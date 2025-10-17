@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/hhplus-backend-study.iml" filepath="$PROJECT_DIR$/.idea/hhplus-backend-study.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hhplus-tdd-jvm.main.iml" filepath="$PROJECT_DIR$/.idea/modules/hhplus-tdd-jvm.main.iml" />
+    </modules>
+  </component>
+</project>
