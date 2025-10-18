@@ -11,20 +11,6 @@ class PointControllerTest {
 
 
     @Test
-    void retrieve_point_from_user_test(){
-
-        //given
-        long userId = 1;
-
-        //when
-        UserPoint point = new PointController().point(userId);
-
-        //than
-        assertThat(point).isNull();
-    }
-
-
-    @Test
     void retrieve_chageAndUse_history_from_user_Test(){
 
         //given
@@ -65,6 +51,17 @@ class PointControllerTest {
 
     }
 
+    @Test
+    void retrieve_point_from_user_test(){
 
+        //given
+        long userId = 1;
+
+        //when
+        List<PointHistory> history = new PointController().history(userId);
+
+        //than
+        assertThat(history).isNull();
+    }
 
 }
