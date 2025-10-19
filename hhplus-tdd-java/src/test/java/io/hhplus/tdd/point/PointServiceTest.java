@@ -2,6 +2,8 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
@@ -25,13 +27,19 @@ class PointServiceTest {
     @InjectMocks
     private  PointService service;
 
-    private final long CURRENT_MILLIES = System.currentTimeMillis();
+    private long CURRENT_MILLIES;
+
+    @BeforeEach
+    void each(){
+        long CURRENT_MILLIES = System.currentTimeMillis();
+    }
 
     @Test
     void retrievPointsTest(){
         //given
-        long userId = 1;
-        UserPoint expectedUserPoint = new UserPoint(userId, 1000, CURRENT_MILLIES);
+        long userId = 1L;
+        long amount = 1000L;
+        UserPoint expectedUserPoint = new UserPoint(userId, amount, CURRENT_MILLIES);
         when(userPointTable.selectById(userId)).thenReturn(expectedUserPoint);
 
         //when
@@ -47,9 +55,11 @@ class PointServiceTest {
     void retrievePointHistoriesTest(){
 
         //given
-        long userId = 1;
-        PointHistory expectedPointHistory = new PointHistory(1, 1, 1000, TransactionType.CHARGE, CURRENT_MILLIES);
+        long userId = 1L;
+        long amount = 1000L;
+        PointHistory expectedPointHistory = new PointHistory(1, userId, amount, TransactionType.CHARGE, CURRENT_MILLIES);
         List<PointHistory> expectedPointHistories = List.of(expectedPointHistory);
+        when(userPointTable.selectById(userId)).thenReturn( UserPoint.empty(userId) );
         when(pointHistoryTable.selectAllByUserId(userId)).thenReturn(expectedPointHistories);
 
         //when
@@ -66,21 +76,24 @@ class PointServiceTest {
         long userId = 1L;
         long amount = 1000L;
 
-        UserPoint empty = UserPoint.empty(userId);
-        long currentMillies = CURRENT_MILLIES;
-        UserPoint expectedUserPoint = new UserPoint(userId, amount, currentMillies);
-        PointHistory expectedPointHistory = new PointHistory(1, 1, 1000, TransactionType.CHARGE, currentMillies);
+        UserPoint emptyUserPoint = UserPoint.empty(userId);
+        UserPoint calculatedUserPoint = emptyUserPoint.calculatePoint(amount, TransactionType.CHARGE);
 
-        when(userPointTable.selectById(userId)).thenReturn(empty);
-        when(userPointTable.insertOrUpdate(userId,amount)).thenReturn(expectedUserPoint);
-        when(pointHistoryTable.insert(userId,amount,TransactionType.CHARGE , currentMillies)).thenReturn(expectedPointHistory);
+        UserPoint expectedUserPoint = new UserPoint(calculatedUserPoint.id(), calculatedUserPoint.point(), CURRENT_MILLIES);
+        PointHistory expectedPointHistory = new PointHistory(1, userId, amount, TransactionType.CHARGE, CURRENT_MILLIES);
+
+        when(userPointTable.selectById(userId)).thenReturn(emptyUserPoint);
+        when(userPointTable.insertOrUpdate(userId,calculatedUserPoint.point())).thenReturn(expectedUserPoint);
+        when(pointHistoryTable.insert(userId,amount,TransactionType.CHARGE , CURRENT_MILLIES)).thenReturn(expectedPointHistory);
 
         //when
-        UserPoint userPoint = userPointTable.insertOrUpdate(userId, amount);
+        UserPoint userPoint = service.charge(userId,amount);
 
         //than
-        assertThat(userPoint).isEqualTo(expectedUserPoint);
-        verify(userPointTable).insertOrUpdate(userId,amount);
+        assertThat(userPoint.point()).isEqualTo(calculatedUserPoint.point());
+        verify(userPointTable).selectById(userId);
+        verify(userPointTable).insertOrUpdate(userId,calculatedUserPoint.point());
+        verify(pointHistoryTable).insert(userId,amount,TransactionType.CHARGE , CURRENT_MILLIES);
     }
 
     @Test
@@ -89,23 +102,24 @@ class PointServiceTest {
         long userId = 1L;
         long amount = 1000L;
 
-        long currentMillies = CURRENT_MILLIES;
-        UserPoint savedUserPoint = new UserPoint(userId, amount, currentMillies);
+        UserPoint savedUserPoint = new UserPoint(userId, amount, CURRENT_MILLIES);
+        UserPoint calculatedUserPoint = savedUserPoint.calculatePoint(amount, TransactionType.USE);
 
-        long calculated = savedUserPoint.point() - amount;
-        UserPoint expectedUserPoint = new UserPoint(userId, savedUserPoint.point() - amount, currentMillies);
-        PointHistory expectedPointHistory = new PointHistory(1, userId, 1000, TransactionType.USE, currentMillies);
+        UserPoint expectedUserPoint = new UserPoint(userId, calculatedUserPoint.point(), CURRENT_MILLIES);
+        PointHistory expectedPointHistory = new PointHistory(1, userId, amount, TransactionType.USE, CURRENT_MILLIES);
 
         when(userPointTable.selectById(userId)).thenReturn(savedUserPoint);
-        when(userPointTable.insertOrUpdate(userId,calculated)).thenReturn(expectedUserPoint);
-        when(pointHistoryTable.insert(userId,calculated,TransactionType.USE , currentMillies)).thenReturn(expectedPointHistory);
+        when(userPointTable.insertOrUpdate(userId,calculatedUserPoint.point())).thenReturn(expectedUserPoint);
+        when(pointHistoryTable.insert(userId,amount,TransactionType.USE , CURRENT_MILLIES)).thenReturn(expectedPointHistory);
 
         //when
-        UserPoint userPoint = userPointTable.insertOrUpdate(userId, calculated);
+        UserPoint userPoint = service.use(userId,amount);
 
         //than
-        assertThat(userPoint).isEqualTo(expectedUserPoint);
-        verify(userPointTable).insertOrUpdate(userId,calculated);
+        assertThat(userPoint.point()).isEqualTo(calculatedUserPoint.point());
+        verify(userPointTable).selectById(userId);
+        verify(userPointTable).insertOrUpdate(userId,calculatedUserPoint.point());
+        verify(pointHistoryTable).insert(userId,amount,TransactionType.USE , CURRENT_MILLIES);
     }
 
 }

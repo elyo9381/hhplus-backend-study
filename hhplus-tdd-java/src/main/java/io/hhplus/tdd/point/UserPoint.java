@@ -10,7 +10,14 @@ public record UserPoint(
         return new UserPoint(id, 0, System.currentTimeMillis());
     }
 
-    public boolean isGreatThanZero(){
-        return point > 0 ? Boolean.TRUE : Boolean.FALSE;
+    public UserPoint calculatePoint(long amount,TransactionType type){
+        long calculatedPoint = switch (type) {
+            case CHARGE -> this.point() + amount;
+            case USE -> this.point() - amount;
+        };
+
+        if (calculatedPoint < 0) throw new IllegalArgumentException("0보다 작을수는 없습니다.");
+
+        return new UserPoint(this.id, calculatedPoint, System.currentTimeMillis());
     }
 }
