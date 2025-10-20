@@ -1,12 +1,14 @@
-package io.hhplus.tdd.point;
+package io.hhplus.tdd.point.unit;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
-import org.junit.jupiter.api.BeforeAll;
+import io.hhplus.tdd.point.PointHistory;
+import io.hhplus.tdd.point.PointService;
+import io.hhplus.tdd.point.TransactionType;
+import io.hhplus.tdd.point.UserPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.Extensions;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,7 +27,7 @@ class PointServiceTest {
     @Mock
     private  UserPointTable userPointTable;
     @InjectMocks
-    private  PointService service;
+    private PointService service;
 
     private long CURRENT_MILLIES;
 
