@@ -3,6 +3,7 @@ package io.hhplus.tdd.point.controller;
 import io.hhplus.tdd.point.PointController;
 import io.hhplus.tdd.point.PointService;
 import io.hhplus.tdd.point.UserPoint;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * 컨트롤러 테스트
+ * 작성 이유 :
+ * http 응답에 대한 성공값 , 실패값을 확인하기 위해서
+ */
 @WebMvcTest(PointController.class)
 class PointControllerTest {
 
@@ -31,6 +37,7 @@ class PointControllerTest {
     private PointService service;
 
     @Test
+    @DisplayName("충전 성공 후 응답")
     void charge_success() throws Exception {
         // given
         long userId = 1L;
@@ -45,24 +52,25 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.id").value(userId))
                 .andExpect(jsonPath("$.point").value(1000));
     }
-    // 2. 잘못된 요청 - Content-Type 없음
+
     @Test
+    @DisplayName("잘못된 요청 - Content-Type 없음")
     void charge_without_contentType() throws Exception {
         mockMvc.perform(patch("/point/{id}/charge", 1L)
                         .content("1000"))
-                .andExpect(status().isUnsupportedMediaType());  // 415
+                .andExpect(status().isUnsupportedMediaType());
     }
 
-    // 3. 잘못된 요청 - Body 없음
     @Test
+    @DisplayName("잘못된 요청 - Body 없음")
     void charge_without_body() throws Exception {
         mockMvc.perform(patch("/point/{id}/charge", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());  // 400
+                .andExpect(status().isBadRequest());
     }
 
-    // 4. 잘못된 요청 - 잘못된 JSON
     @Test
+    @DisplayName("잘못된 요청 - 잘못된 JSON")
     void charge_with_invalid_json() throws Exception {
         mockMvc.perform(patch("/point/{id}/charge", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -70,8 +78,8 @@ class PointControllerTest {
                 .andExpect(status().isBadRequest());  // 400
     }
 
-    // 5. 비즈니스 예외 - 포인트 부족
     @Test
+    @DisplayName("비즈니스 예외 - 포인트 부족")
     void use_insufficient_point() throws Exception {
         when(service.use(1L, 1000L))
                 .thenThrow(new IllegalArgumentException("포인트가 부족합니다"));
@@ -84,8 +92,8 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.message").value("포인트가 부족합니다"));
     }
 
-    // 6. PathVariable 검증
     @Test
+    @DisplayName("PathVariable 검증")
     void charge_with_invalid_pathVariable() throws Exception {
         mockMvc.perform(patch("/point/abc/charge")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,8 +113,8 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.point").value(1000));
     }
 
-    // 8. 히스토리 조회 - 빈 리스트
     @Test
+    @DisplayName("히스토리 조회 - 빈 리스트")
     void retrieve_history_empty() throws Exception {
         when(service.retrievePointHistroies(1L)).thenReturn(List.of());
 
@@ -117,8 +125,8 @@ class PointControllerTest {
     }
 
 
-    // 9. 충전시도 중 알수없는 Exception 발생시
     @Test
+    @DisplayName("충전 중 알수없는 Exception 발생시")
     void exception_excute_unknow() throws Exception {
         when(service.charge(1L, -1000L))
                 .thenThrow(new NullPointerException("예상치 못한 오류"));

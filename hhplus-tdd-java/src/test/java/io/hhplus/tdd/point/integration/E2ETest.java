@@ -15,6 +15,10 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
+/**
+ * E2E 테스트를 통해서 실제 비즈니스 흐름 테스트
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class E2ETest {
 

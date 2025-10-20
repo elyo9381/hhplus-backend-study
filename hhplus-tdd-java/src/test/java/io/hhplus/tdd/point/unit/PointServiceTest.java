@@ -19,6 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * 서비스의 흐름을 파악 할수 있는 유닛 테스트 작성
+ */
 @ExtendWith(MockitoExtension.class)
 class PointServiceTest {
 
