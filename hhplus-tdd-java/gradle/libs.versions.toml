@@ -38,6 +38,8 @@ spring_boot_starter_actuator = { module = "org.springframework.boot:spring-boot-
 spring_boot_configuration_processor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
 spring_boot_starter_test = { module = "org.springframework.boot:spring-boot-starter-test" }
 
+apache_httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5", version = "5.2.1" }
+
 spring_boot_testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
 test_containers_junit_jupiter = { module = "org.testcontainers:junit-jupiter" }
 test_containers_mysql = { module = "org.testcontainers:mysql" }
