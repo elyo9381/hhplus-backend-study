@@ -10,6 +10,11 @@ public class UserPointEntity {
 
     protected UserPointEntity() {}
 
+    public UserPointEntity(long amount, PointType type) {
+        this.amount = amount;
+        this.type = type;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id ;

@@ -9,6 +9,13 @@ public class ProductEntity {
 
     protected ProductEntity(){}
 
+    public ProductEntity(String name, long price, long inventoryCount, ProductType type) {
+        this.name = name;
+        this.price = price;
+        this.inventoryCount = inventoryCount;
+        this.type = type;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;

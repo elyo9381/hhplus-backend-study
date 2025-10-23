@@ -9,6 +9,12 @@ public class PaymentEntity {
 
     protected PaymentEntity(){}
 
+    public PaymentEntity(long userId, long amount, PaymentStatus status) {
+        this.userId = userId;
+        this.amount = amount;
+        this.status = status;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;

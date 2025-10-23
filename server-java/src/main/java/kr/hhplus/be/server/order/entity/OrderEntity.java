@@ -13,6 +13,14 @@ public class OrderEntity {
 
     protected OrderEntity() {}
 
+    public OrderEntity(long userId, long amount, long price, long finalPrice, OrderStatus status) {
+        this.userId = userId;
+        this.amount = amount;
+        this.price = price;
+        this.finalPrice = finalPrice;
+        this.status = status;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -78,6 +86,11 @@ public class OrderEntity {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate(){
+        this.createdAt = LocalDateTime.now();
     }
 }
 

@@ -11,6 +11,10 @@ public class UserEntity {
 
     protected UserEntity() {}
 
+    public UserEntity(String name) {
+        this.name = name;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id ;
