@@ -117,7 +117,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/point'
+                $ref: '#/components/schemas/userPoint'
 
   /api/points/{userId}:
     get:
@@ -138,7 +138,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/point'
+                $ref: '#/components/schemas/userPoint'
 
 components:
   schemas:
@@ -287,20 +287,20 @@ components:
         amount:
           type: integer
           format: int64
-    point:
+    userPoint:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
         userId:
           type: integer
           format: int64
+        pointType:
+          type: string
+          enum: [ NORMAL, EVENT, REWARD ]
         amount:
           type: integer
           format: int64
-        status:
+        expireAt:
           type: string
-          enum: [ CHARGE, USE ]
+          format: date-time
 
 
