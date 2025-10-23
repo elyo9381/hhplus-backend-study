@@ -11,3 +11,14 @@
 ```bash
 docker-compose up -d
 ```
+
+### e-commerce prj
+
+#### 요구사항 정의
+
+필수 요구사항
+
+- 상품조회 api
+- 주문생성
+- 결제실행
+- 포인트 조회 / 충전 
