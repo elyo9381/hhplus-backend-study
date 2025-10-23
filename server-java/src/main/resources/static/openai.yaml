@@ -1,0 +1,306 @@
+openapi: 3.0.0
+info:
+  title: HHPlus API
+  version: 1.0.0
+  description: 항해플러스 API 명세
+
+servers:
+  - url: http://localhost:8080
+    description: 로컬 서버
+
+paths:
+  /api/users/{id}:
+    get:
+      summary: 사용자 조회
+      operationId: getUser
+      tags:
+        - user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '404':
+          description: 사용자 없음
+
+  /api/products/{id}:
+    get:
+      summary: 상품 조회
+      operationId: getProduct
+      tags:
+        - product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/product'
+        '404':
+          description: 상품 없음
+
+  /api/order:
+    post:
+      summary: 주문 생성
+      operationId: createOrder
+      tags:
+        - order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createOrder'
+      responses:
+        '200':
+          description: 주문 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order'
+        '404':
+          description: 재고 부족 또는 잘못된 요청
+
+  /api/payment:
+    post:
+      summary: 결제 실행
+      operationId: executePayment
+      tags:
+        - payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/paymentRequest'
+      responses:
+        '200':
+          description: 결제 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment'
+        '404':
+          description: 포인트 부족 및 결제 실패
+
+  /api/point/charge:
+    post:
+      summary: 포인트 충전
+      operationId: chargePoint
+      tags:
+        - Point
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref:  '#/components/schemas/chargePointRequest'
+      responses:
+        '200':
+          description: 충전 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/point'
+
+  /api/points/{userId}:
+    get:
+      summary: 포인트 조회
+      operationId: getPoint
+      tags:
+        - Point
+      parameters:
+        - name : userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 충전 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/point'
+
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: integer
+          format: int64
+        inventoryCount:
+          type: integer
+          format: int64
+        type:
+          type: string
+          enum: [SELLING, SOLDOUT, STOP]
+
+    createOrder:
+      type: object
+      required:
+        - userId
+        - items
+      properties:
+        userId:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - productId
+              - quantity
+            properties:
+              productId:
+                type: integer
+                format: int64
+              quantity:
+                type: integer
+                format: int64
+
+
+    order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        price:
+          type: integer
+          format: int64
+        finalPrice:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [ PENDING, PAID, CANCELLED ]
+        createdAt:
+            type: string
+            format: date-time
+    orderItems:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        productId:
+          type: integer
+          format: int64
+        basePrice:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int64
+        totalPrice:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+
+
+    paymentRequest:
+      type: object
+      required:
+        - orderId
+        - userId
+        - amount
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        amount:
+          type: integer
+          format: int64
+
+    payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        amount:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [ SUCCESS, FAILED, CANCELLED ]
+
+
+    chargePointRequest:
+      type: object
+      required:
+        - userId
+        - amount
+      properties:
+        userId:
+          type: integer
+          format: int64
+        amount:
+          type: integer
+          format: int64
+    point:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        amount:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [ CHARGE, USE ]
+
+
