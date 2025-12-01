@@ -16,15 +16,13 @@ public class UserService {
 
     @Transactional
     public User createUser(String email, String name) {
-        UserEntity entity = new UserEntity(email, name);
-        UserEntity savedEntity = userRepository.save(entity);
-        return savedEntity.toDomain();
+        User user = new User(email, name);
+        return userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
     public User getUser(UUID id) {
         return userRepository.findById(id)
-                .map(UserEntity::toDomain)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 }

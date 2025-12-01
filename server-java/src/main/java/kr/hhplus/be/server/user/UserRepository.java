@@ -1,8 +1,9 @@
 package kr.hhplus.be.server.user;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import java.util.Optional;
 import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<UserEntity, UUID> {
+public interface UserRepository {
+    User save(User user);
+    Optional<User> findById(UUID id);
 }

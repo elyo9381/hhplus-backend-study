@@ -3,12 +3,14 @@ package kr.hhplus.be.server.user;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@Import(UserRepositoryImpl.class)
 class UserRepositoryTest {
 
     @Autowired
@@ -17,16 +19,16 @@ class UserRepositoryTest {
     @Test
     void shouldSaveAndFindUser() {
         // given
-        UserEntity entity = new UserEntity("test@example.com", "Test User");
+        User user = new User("test@example.com", "Test User");
 
         // when
-        UserEntity savedEntity = userRepository.save(entity);
-        Optional<UserEntity> foundEntity = userRepository.findById(savedEntity.getId());
+        User savedUser = userRepository.save(user);
+        Optional<User> foundUser = userRepository.findById(savedUser.getId());
 
         // then
-        assertThat(foundEntity).isPresent();
-        assertThat(foundEntity.get().getEmail()).isEqualTo("test@example.com");
-        assertThat(foundEntity.get().getName()).isEqualTo("Test User");
-        assertThat(foundEntity.get().getCreatedAt()).isNotNull();
+        assertThat(foundUser).isPresent();
+        assertThat(foundUser.get().getEmail()).isEqualTo("test@example.com");
+        assertThat(foundUser.get().getName()).isEqualTo("Test User");
+        assertThat(foundUser.get().getCreatedAt()).isNotNull();
     }
 }
