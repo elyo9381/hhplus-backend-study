@@ -17,16 +17,16 @@ class UserRepositoryTest {
     @Test
     void shouldSaveAndFindUser() {
         // given
-        User user = new User("test@example.com", "Test User");
+        UserEntity entity = new UserEntity("test@example.com", "Test User");
 
         // when
-        User savedUser = userRepository.save(user);
-        Optional<User> foundUser = userRepository.findById(savedUser.getId());
+        UserEntity savedEntity = userRepository.save(entity);
+        Optional<UserEntity> foundEntity = userRepository.findById(savedEntity.getId());
 
         // then
-        assertThat(foundUser).isPresent();
-        assertThat(foundUser.get().getEmail()).isEqualTo("test@example.com");
-        assertThat(foundUser.get().getName()).isEqualTo("Test User");
-        assertThat(foundUser.get().getCreatedAt()).isNotNull();
+        assertThat(foundEntity).isPresent();
+        assertThat(foundEntity.get().getEmail()).isEqualTo("test@example.com");
+        assertThat(foundEntity.get().getName()).isEqualTo("Test User");
+        assertThat(foundEntity.get().getCreatedAt()).isNotNull();
     }
 }

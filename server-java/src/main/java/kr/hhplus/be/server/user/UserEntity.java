@@ -32,4 +32,17 @@ public class UserEntity {
         this.name = name;
         this.createdAt = LocalDateTime.now();
     }
+
+    public User toDomain() {
+        return new User(id, email, name, createdAt);
+    }
+
+    public static UserEntity fromDomain(User user) {
+        UserEntity entity = new UserEntity();
+        entity.id = user.getId();
+        entity.email = user.getEmail();
+        entity.name = user.getName();
+        entity.createdAt = user.getCreatedAt();
+        return entity;
+    }
 }
