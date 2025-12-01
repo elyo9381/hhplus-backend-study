@@ -17,7 +17,7 @@ public class UserController {
     @PostMapping("/api/users")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateUserResponse createUser(@RequestBody CreateUserRequest request) {
-        UserEntity user = userService.createUser(request.email(), request.name());
+        User user = userService.createUser(request.email(), request.name());
         return new CreateUserResponse(
                 user.getId(),
                 user.getEmail(),
@@ -28,7 +28,7 @@ public class UserController {
 
     @GetMapping("/api/users/{id}")
     public CreateUserResponse getUser(@PathVariable UUID id) {
-        UserEntity user = userService.getUser(id);
+        User user = userService.getUser(id);
         return new CreateUserResponse(
                 user.getId(),
                 user.getEmail(),
