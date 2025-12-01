@@ -1,0 +1,93 @@
+package kr.hhplus.be.server.product;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ProductServiceTest {
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @InjectMocks
+    private ProductService productService;
+
+    @Test
+    void shouldGetProduct() {
+        // given
+        UUID productId = UUID.randomUUID();
+        ProductEntity product = new ProductEntity("Product A", "Description", BigDecimal.valueOf(10000), 100);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+        // when
+        ProductEntity result = productService.getProduct(productId);
+
+        // then
+        assertThat(result.getName()).isEqualTo("Product A");
+        assertThat(result.getPrice()).isEqualTo(BigDecimal.valueOf(10000));
+        verify(productRepository).findById(productId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProductNotFound() {
+        // given
+        UUID productId = UUID.randomUUID();
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> productService.getProduct(productId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Product not found");
+    }
+
+    @Test
+    void shouldGetAllProducts() {
+        // given
+        List<ProductEntity> products = List.of(
+                new ProductEntity("Product A", "Desc A", BigDecimal.valueOf(10000), 100),
+                new ProductEntity("Product B", "Desc B", BigDecimal.valueOf(20000), 50)
+        );
+        when(productRepository.findAll()).thenReturn(products);
+
+        // when
+        List<ProductEntity> result = productService.getProducts();
+
+        // then
+        assertThat(result).hasSize(2);
+        verify(productRepository).findAll();
+    }
+
+    @Test
+    void shouldCreateProduct() {
+        // given
+        String name = "New Product";
+        String description = "New Description";
+        BigDecimal price = BigDecimal.valueOf(15000);
+        int stock = 50;
+        
+        ProductEntity savedProduct = new ProductEntity(name, description, price, stock);
+        when(productRepository.save(org.mockito.ArgumentMatchers.any(ProductEntity.class))).thenReturn(savedProduct);
+
+        // when
+        ProductEntity result = productService.createProduct(name, description, price, stock);
+
+        // then
+        assertThat(result.getName()).isEqualTo(name);
+        assertThat(result.getPrice()).isEqualTo(price);
+        assertThat(result.getStock()).isEqualTo(stock);
+        verify(productRepository).save(org.mockito.ArgumentMatchers.any(ProductEntity.class));
+    }
+}
