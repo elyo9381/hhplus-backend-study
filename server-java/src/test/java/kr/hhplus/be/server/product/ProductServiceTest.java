@@ -90,4 +90,87 @@ class ProductServiceTest {
         assertThat(result.getStock()).isEqualTo(stock);
         verify(productRepository).save(org.mockito.ArgumentMatchers.any(ProductEntity.class));
     }
+
+    @Test
+    void shouldDecreaseStock() {
+        // given
+        UUID productId = UUID.randomUUID();
+        ProductEntity product = new ProductEntity("Product A", "Description", BigDecimal.valueOf(10000), 10);
+        when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+        // when
+        productService.decreaseStock(productId, 3);
+
+        // then
+        assertThat(product.getStock()).isEqualTo(7);
+        verify(productRepository).findByIdWithLock(productId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProductNotFoundForDecrease() {
+        // given
+        UUID productId = UUID.randomUUID();
+        when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> productService.decreaseStock(productId, 3))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Product not found");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenInsufficientStockForDecrease() {
+        // given
+        UUID productId = UUID.randomUUID();
+        ProductEntity product = new ProductEntity("Product A", "Description", BigDecimal.valueOf(10000), 5);
+        when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+        // when & then
+        assertThatThrownBy(() -> productService.decreaseStock(productId, 10))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Insufficient stock");
+    }
+
+    @Test
+    void shouldDecreaseStockWithSnapshot() {
+        // given
+        UUID productId = UUID.randomUUID();
+        ProductEntity product = new ProductEntity("Product A", "Description", BigDecimal.valueOf(10000), 10);
+        when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+        // when
+        ProductSnapshot snapshot = productService.decreaseStockWithSnapshot(productId, 3);
+
+        // then
+        assertThat(product.getStock()).isEqualTo(7);
+        assertThat(snapshot.productId()).isEqualTo(product.getId());
+        assertThat(snapshot.productName()).isEqualTo("Product A");
+        assertThat(snapshot.unitPrice()).isEqualTo(10000L);
+        verify(productRepository).findByIdWithLock(productId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProductNotFoundForSnapshot() {
+        // given
+        UUID productId = UUID.randomUUID();
+        when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> productService.decreaseStockWithSnapshot(productId, 3))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Product not found");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenInsufficientStockForSnapshot() {
+        // given
+        UUID productId = UUID.randomUUID();
+        ProductEntity product = new ProductEntity("Product A", "Description", BigDecimal.valueOf(10000), 5);
+        when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+        // when & then
+        assertThatThrownBy(() -> productService.decreaseStockWithSnapshot(productId, 10))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Insufficient stock");
+    }
 }
