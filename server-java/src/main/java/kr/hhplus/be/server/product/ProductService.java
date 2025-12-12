@@ -32,4 +32,27 @@ public class ProductService {
     public List<ProductEntity> getProducts() {
         return productRepository.findAll();
     }
+
+    @Transactional
+    public void decreaseStock(UUID productId, int quantity) {
+        ProductEntity product = productRepository.findByIdWithLock(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        
+        product.decreaseStock(quantity);
+        // JPA 변경 감지로 자동 저장
+    }
+
+    @Transactional
+    public ProductSnapshot decreaseStockWithSnapshot(UUID productId, int quantity) {
+        ProductEntity product = productRepository.findByIdWithLock(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        
+        product.decreaseStock(quantity);
+        
+        return new ProductSnapshot(
+                product.getId(),
+                product.getName(),
+                product.getPrice().longValue()
+        );
+    }
 }

@@ -50,4 +50,17 @@ public class ProductEntity {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new IllegalArgumentException("Insufficient stock");
+        }
+        this.stock -= quantity;
+        updateStatus();
+    }
+
+    private void updateStatus() {
+        this.status = this.stock > 0 ? ProductStatus.SELLING : ProductStatus.SOLDOUT;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
