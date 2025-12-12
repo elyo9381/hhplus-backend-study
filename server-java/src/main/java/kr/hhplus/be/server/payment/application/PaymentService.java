@@ -1,0 +1,68 @@
+package kr.hhplus.be.server.payment.application;
+
+import kr.hhplus.be.server.order.domain.Order;
+import kr.hhplus.be.server.order.domain.OrderRepository;
+import kr.hhplus.be.server.order.domain.OrderStatus;
+import kr.hhplus.be.server.payment.domain.Payment;
+import kr.hhplus.be.server.payment.domain.PaymentRepository;
+import kr.hhplus.be.server.payment.domain.PaymentStatus;
+import kr.hhplus.be.server.point.PointService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class PaymentService {
+
+    private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
+    private final PointService pointService;
+
+    public PaymentService(PaymentRepository paymentRepository,
+                          OrderRepository orderRepository,
+                          PointService pointService) {
+        this.paymentRepository = paymentRepository;
+        this.orderRepository = orderRepository;
+        this.pointService = pointService;
+    }
+
+    @Transactional
+    public Payment executePayment(UUID orderId, UUID userId) {
+        // 1. 주문 조회 및 락 획득 (동시성 제어)
+        Order order = orderRepository.findByIdWithLock(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+        // 2. 결제 중복 체크
+        Optional<Payment> existingPayment = paymentRepository.findByOrderId(orderId);
+        if (existingPayment.isPresent()) {
+            throw new IllegalStateException("Payment already exists");
+        }
+
+        // 3. 사용자 검증
+        if (!order.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("User mismatch");
+        }
+
+        // 4. 주문 상태 검증
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Order is not pending");
+        }
+
+        // 5. 포인트 사용
+        Long amount = order.getFinalAmount();
+        pointService.usePoint(userId, amount);
+
+        // 6. 결제 생성 및 완료
+        Payment payment = new Payment(orderId, userId, amount, amount);
+        payment.complete();
+        Payment savedPayment = paymentRepository.save(payment);
+
+        // 7. 주문 상태 변경
+        order.completePayment(amount);
+        orderRepository.save(order);
+
+        return savedPayment;
+    }
+}
