@@ -5,7 +5,6 @@ import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.order.domain.OrderRepository;
 import kr.hhplus.be.server.order.domain.OrderStatus;
 import kr.hhplus.be.server.payment.application.PaymentService;
-import kr.hhplus.be.server.point.PointService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +30,7 @@ class PaymentServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private PointService pointService;
+    private PointPort pointPort;
 
     @InjectMocks
     private PaymentService paymentService;
@@ -60,7 +59,7 @@ class PaymentServiceTest {
         // then
         assertThat(result.getStatus()).isEqualTo(PaymentStatus.SUCCESS);
         assertThat(result.getAmount()).isEqualTo(20000L);
-        verify(pointService).usePoint(userId, 20000L);
+        verify(pointPort).usePoint(userId, 20000L);
         verify(paymentRepository).save(any(Payment.class));
         verify(orderRepository).save(any(Order.class));
     }
@@ -84,7 +83,7 @@ class PaymentServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Payment already exists");
 
-        verify(pointService, never()).usePoint(any(), any());
+        verify(pointPort, never()).usePoint(any(), any());
     }
 
     @Test
@@ -100,7 +99,7 @@ class PaymentServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Order not found");
 
-        verify(pointService, never()).usePoint(any(), any());
+        verify(pointPort, never()).usePoint(any(), any());
     }
 
     @Test
@@ -122,7 +121,7 @@ class PaymentServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("User mismatch");
 
-        verify(pointService, never()).usePoint(any(), any());
+        verify(pointPort, never()).usePoint(any(), any());
     }
 
     @Test
@@ -144,7 +143,7 @@ class PaymentServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Order is not pending");
 
-        verify(pointService, never()).usePoint(any(), any());
+        verify(pointPort, never()).usePoint(any(), any());
     }
 
     @Test
@@ -160,7 +159,7 @@ class PaymentServiceTest {
         when(orderRepository.findByIdWithLock(orderId)).thenReturn(Optional.of(order));
         when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.empty());
         doThrow(new IllegalArgumentException("Insufficient point balance"))
-                .when(pointService).usePoint(userId, 20000L);
+                .when(pointPort).usePoint(userId, 20000L);
 
         // when & then
         assertThatThrownBy(() -> paymentService.executePayment(orderId, userId))

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.point;
 
+import kr.hhplus.be.server.payment.domain.PointPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-public class PointService {
+public class PointService implements PointPort {
 
     private final PointRepository pointRepository;
     private final PointHistoryRepository pointHistoryRepository;
@@ -37,6 +38,7 @@ public class PointService {
         return saved;
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Long getAvailablePoints(UUID userId) {
         LocalDateTime now = LocalDateTime.now();
@@ -46,6 +48,7 @@ public class PointService {
                 .sum();
     }
 
+    @Override
     @Transactional
     public void usePoint(UUID userId, Long amount) {
         // 1. 만료되지 않은 포인트 조회 (락)

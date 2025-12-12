@@ -6,7 +6,7 @@ import kr.hhplus.be.server.order.domain.OrderStatus;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.PaymentRepository;
 import kr.hhplus.be.server.payment.domain.PaymentStatus;
-import kr.hhplus.be.server.point.PointService;
+import kr.hhplus.be.server.payment.domain.PointPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,14 +18,14 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
-    private final PointService pointService;
+    private final PointPort pointPort;
 
     public PaymentService(PaymentRepository paymentRepository,
                           OrderRepository orderRepository,
-                          PointService pointService) {
+                          PointPort pointPort) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
-        this.pointService = pointService;
+        this.pointPort = pointPort;
     }
 
     @Transactional
@@ -52,7 +52,7 @@ public class PaymentService {
 
         // 5. 포인트 사용
         Long amount = order.getFinalAmount();
-        pointService.usePoint(userId, amount);
+        pointPort.usePoint(userId, amount);
 
         // 6. 결제 생성 및 완료
         Payment payment = new Payment(orderId, userId, amount, amount);

@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7ebe9288-1c27-4e9f-8a12-75c00c0cec1c" name="Changes" comment="erd 추가">
+      <change beforePath="$PROJECT_DIR$/server-java/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/server-java/README.md" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$USER_HOME$/Downloads/server-java/server-java">
+      <ProjectState />
+    </projectState>
+    <projectState path="$PROJECT_DIR$/hhplus-tdd-java">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/hhplus-tdd-java">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="hhplus-tdd-jvm" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;elyo9381&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/elyo9381/hhplus-backend-study.git&quot;,
+    &quot;accountId&quot;: &quot;a449c9c5-2841-4696-b886-0ffe78f3fd9f&quot;
+  }
+}</component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$USER_HOME$/Downloads/server-java/server-java" gradleHome="$USER_HOME$/.gradle/wrapper/dists/gradle-8.11.1-bin/bpt9gzteqjrbo1mjrsomdt32c/gradle-8.11.1" javaHome="$USER_HOME$/Library/Java/JavaVirtualMachines/corretto-17.0.5/Contents/Home" gradleVersion="8.11.1" />
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="34PNMq6fjaevaQJVr1Rl18J0onN" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.Build hhplus-tdd-java.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feature/server-java",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/yowon/study/hhplus-backend-study/server-java/src/main/java/kr/hhplus/be/server/user",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/server-java/src/main/java/kr/hhplus/be/server/user" />
+      <recent name="$PROJECT_DIR$/server-java/src/main/java/kr/hhplus/be/server/product" />
+      <recent name="$PROJECT_DIR$/server-java/src/main/java/kr/hhplus/be/server/payment/entity" />
+      <recent name="$PROJECT_DIR$/server-java/src/main/java/kr/hhplus/be/server/payment" />
+      <recent name="$PROJECT_DIR$/server-java/src/main/java/kr/hhplus/be/server/order" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/server-java/src/main/java/kr/hhplus/be/server/user/entity" />
+      <recent name="$PROJECT_DIR$/server-java/src/main/java/kr/hhplus/be/server/product/entity" />
+      <recent name="$PROJECT_DIR$/server-java/docs/api-spec" />
+      <recent name="$PROJECT_DIR$/server-java/docs" />
+      <recent name="$PROJECT_DIR$/server-java" />
+    </key>
+  </component>
+  <component name="RunManager" selected="OpenAPI/Swagger Code Generator.openai.yaml">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="hhplus-tdd-java" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="hhplus-tdd-java" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration name="ServerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="server.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="kr.hhplus.be.server.ServerApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TddApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="hhplus-tdd-jvm.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="io.hhplus.tdd.TddApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="openai.yaml" type="SwaggerCodegen" editBeforeRun="true" temporary="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="customTemplatesPath" value="" />
+      <option name="generateToPath" value="$USER_HOME$/gen" />
+      <option name="generationParameters">
+        <list />
+      </option>
+      <option name="generatorType" value="OPENAPI_GENERATOR_V7" />
+      <option name="jdkPath" value="$APPLICATION_HOME_DIR$/jbr/Contents/Home/bin/java" />
+      <option name="language" value="java" />
+      <option name="projectPathOnTarget" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="specificationPath" value="$PROJECT_DIR$/server-java/src/main/resources/static/openai.yaml" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="OpenAPI/Swagger Code Generator.openai.yaml" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task id="LOCAL-00001" summary="깃헙 템플릿">
+      <option name="closed" value="true" />
+      <created>1761029579214</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1761029579214</updated>
+    </task>
+    <task id="LOCAL-00002" summary="깃헙 풀리퀘스트 템플릿">
+      <option name="closed" value="true" />
+      <created>1761029815582</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1761029815582</updated>
+    </task>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7ebe9288-1c27-4e9f-8a12-75c00c0cec1c" name="Changes" comment="깃헙 풀리퀘스트 템플릿" />
+      <created>1761111201527</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1761111201527</updated>
+      <workItem from="1761111202626" duration="35000" />
+      <workItem from="1761111245807" duration="105000" />
+      <workItem from="1761111354191" duration="197000" />
+      <workItem from="1761111554092" duration="36000" />
+      <workItem from="1761111592776" duration="156000" />
+      <workItem from="1761111751708" duration="378000" />
+      <workItem from="1761112139767" duration="452000" />
+      <workItem from="1761112596713" duration="53000" />
+      <workItem from="1761112652691" duration="4300000" />
+      <workItem from="1761117745877" duration="34418000" />
+    </task>
+    <task id="LOCAL-00003" summary="update .idea">
+      <option name="closed" value="true" />
+      <created>1761117544720</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1761117544721</updated>
+    </task>
+    <task id="LOCAL-00004" summary="기본 요구사항 정의">
+      <option name="closed" value="true" />
+      <created>1761202633693</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1761202633693</updated>
+    </task>
+    <task id="LOCAL-00005" summary="기본 요구사항 API 명세 작성">
+      <option name="closed" value="true" />
+      <created>1761202647800</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1761202647800</updated>
+    </task>
+    <task id="LOCAL-00006" summary="api-spec docs디렉토리로 이동">
+      <option name="closed" value="true" />
+      <created>1761202835206</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1761202835206</updated>
+    </task>
+    <task id="LOCAL-00007" summary="README 작성">
+      <option name="closed" value="true" />
+      <created>1761292437629</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1761292437629</updated>
+    </task>
+    <task id="LOCAL-00008" summary="erd 추가">
+      <option name="closed" value="true" />
+      <created>1761693774103</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1761693774103</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="feature/server-java" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="깃헙 템플릿" />
+    <MESSAGE value="깃헙 풀리퀘스트 템플릿" />
+    <MESSAGE value="update .idea" />
+    <MESSAGE value="기본 요구사항 정의" />
+    <MESSAGE value="기본 요구사항 API 명세 작성" />
+    <MESSAGE value="api-spec docs디렉토리로 이동" />
+    <MESSAGE value="README 작성" />
+    <MESSAGE value="erd 추가" />
+    <option name="LAST_COMMIT_MESSAGE" value="erd 추가" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/hhplus-tdd-java/build.gradle.kts</url>
+          <line>3</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

@@ -2,7 +2,6 @@ package kr.hhplus.be.server.order.domain;
 
 import kr.hhplus.be.server.order.application.OrderService;
 import kr.hhplus.be.server.order.application.dto.OrderItemRequest;
-import kr.hhplus.be.server.product.ProductService;
 import kr.hhplus.be.server.product.ProductSnapshot;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +25,7 @@ class OrderServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private ProductService productService;
+    private ProductPort productPort;
 
     @InjectMocks
     private OrderService orderService;
@@ -39,7 +38,7 @@ class OrderServiceTest {
         OrderItemRequest request = new OrderItemRequest(productId, 2);
 
         ProductSnapshot snapshot = new ProductSnapshot(productId, "Product A", 10000L);
-        when(productService.decreaseStockWithSnapshot(productId, 2)).thenReturn(snapshot);
+        when(productPort.decreaseStockWithSnapshot(productId, 2)).thenReturn(snapshot);
 
         Order savedOrder = new Order(userId, List.of(
                 new OrderItem(productId, "Product A", 10000L, 2)
@@ -54,7 +53,7 @@ class OrderServiceTest {
         assertThat(result.getItems()).hasSize(1);
         assertThat(result.getTotalAmount()).isEqualTo(20000L);
         assertThat(result.getStatus()).isEqualTo(OrderStatus.PENDING);
-        verify(productService).decreaseStockWithSnapshot(productId, 2);
+        verify(productPort).decreaseStockWithSnapshot(productId, 2);
         verify(orderRepository).save(any(Order.class));
     }
 
@@ -73,8 +72,8 @@ class OrderServiceTest {
         ProductSnapshot snapshot1 = new ProductSnapshot(productId1, "Product A", 10000L);
         ProductSnapshot snapshot2 = new ProductSnapshot(productId2, "Product B", 20000L);
 
-        when(productService.decreaseStockWithSnapshot(productId1, 2)).thenReturn(snapshot1);
-        when(productService.decreaseStockWithSnapshot(productId2, 3)).thenReturn(snapshot2);
+        when(productPort.decreaseStockWithSnapshot(productId1, 2)).thenReturn(snapshot1);
+        when(productPort.decreaseStockWithSnapshot(productId2, 3)).thenReturn(snapshot2);
 
         Order savedOrder = new Order(userId, List.of(
                 new OrderItem(productId1, "Product A", 10000L, 2),
@@ -88,8 +87,8 @@ class OrderServiceTest {
         // then
         assertThat(result.getItems()).hasSize(2);
         assertThat(result.getTotalAmount()).isEqualTo(80000L); // 20000 + 60000
-        verify(productService).decreaseStockWithSnapshot(productId1, 2);
-        verify(productService).decreaseStockWithSnapshot(productId2, 3);
+        verify(productPort).decreaseStockWithSnapshot(productId1, 2);
+        verify(productPort).decreaseStockWithSnapshot(productId2, 3);
     }
 
     @Test
@@ -108,8 +107,8 @@ class OrderServiceTest {
         ProductSnapshot snapshot1 = new ProductSnapshot(productId1, "Product A", 10000L);
         ProductSnapshot snapshot2 = new ProductSnapshot(productId2, "Product B", 20000L);
 
-        when(productService.decreaseStockWithSnapshot(productId1, 1)).thenReturn(snapshot1);
-        when(productService.decreaseStockWithSnapshot(productId2, 1)).thenReturn(snapshot2);
+        when(productPort.decreaseStockWithSnapshot(productId1, 1)).thenReturn(snapshot1);
+        when(productPort.decreaseStockWithSnapshot(productId2, 1)).thenReturn(snapshot2);
 
         Order savedOrder = new Order(userId, List.of(
                 new OrderItem(productId1, "Product A", 10000L, 1),
@@ -121,9 +120,9 @@ class OrderServiceTest {
         orderService.createOrder(userId, requests);
 
         // then - productId1이 먼저 호출되어야 함 (정렬됨)
-        var inOrder = inOrder(productService);
-        inOrder.verify(productService).decreaseStockWithSnapshot(productId1, 1);
-        inOrder.verify(productService).decreaseStockWithSnapshot(productId2, 1);
+        var inOrder = inOrder(productPort);
+        inOrder.verify(productPort).decreaseStockWithSnapshot(productId1, 1);
+        inOrder.verify(productPort).decreaseStockWithSnapshot(productId2, 1);
     }
 
     @Test
@@ -133,7 +132,7 @@ class OrderServiceTest {
         UUID productId = UUID.randomUUID();
         OrderItemRequest request = new OrderItemRequest(productId, 2);
 
-        when(productService.decreaseStockWithSnapshot(productId, 2))
+        when(productPort.decreaseStockWithSnapshot(productId, 2))
                 .thenThrow(new IllegalArgumentException("Product not found"));
 
         // when & then
@@ -149,7 +148,7 @@ class OrderServiceTest {
         UUID productId = UUID.randomUUID();
         OrderItemRequest request = new OrderItemRequest(productId, 100);
 
-        when(productService.decreaseStockWithSnapshot(productId, 100))
+        when(productPort.decreaseStockWithSnapshot(productId, 100))
                 .thenThrow(new IllegalArgumentException("Insufficient stock"));
 
         // when & then

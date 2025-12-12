@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.product;
 
+import kr.hhplus.be.server.order.domain.ProductPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class ProductService {
+public class ProductService implements ProductPort {
 
     private final ProductRepository productRepository;
 
@@ -42,6 +43,7 @@ public class ProductService {
         // JPA 변경 감지로 자동 저장
     }
 
+    @Override
     @Transactional
     public ProductSnapshot decreaseStockWithSnapshot(UUID productId, int quantity) {
         ProductEntity product = productRepository.findByIdWithLock(productId)

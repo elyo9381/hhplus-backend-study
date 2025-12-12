@@ -4,7 +4,7 @@ import kr.hhplus.be.server.order.application.dto.OrderItemRequest;
 import kr.hhplus.be.server.order.domain.Order;
 import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.order.domain.OrderRepository;
-import kr.hhplus.be.server.product.ProductService;
+import kr.hhplus.be.server.order.domain.ProductPort;
 import kr.hhplus.be.server.product.ProductSnapshot;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +18,11 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final ProductService productService;
+    private final ProductPort productPort;
 
-    public OrderService(OrderRepository orderRepository, ProductService productService) {
+    public OrderService(OrderRepository orderRepository, ProductPort productPort) {
         this.orderRepository = orderRepository;
-        this.productService = productService;
+        this.productPort = productPort;
     }
 
     @Transactional
@@ -35,7 +35,7 @@ public class OrderService {
         // 재고 차감 + 스냅샷 획득
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemRequest request : sortedRequests) {
-            ProductSnapshot snapshot = productService.decreaseStockWithSnapshot(
+            ProductSnapshot snapshot = productPort.decreaseStockWithSnapshot(
                     request.productId(),
                     request.quantity()
             );
