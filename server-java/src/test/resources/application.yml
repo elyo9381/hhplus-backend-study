@@ -12,11 +12,13 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
+        use_sql_comments: true
   sql:
     init:
       mode: never
 logging:
   level:
-    org.hibernate: WARN
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework: WARN
 
