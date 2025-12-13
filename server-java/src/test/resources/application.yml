@@ -1,9 +1,5 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+  # Testcontainers @ServiceConnection이 자동으로 설정하므로 datasource 설정 불필요
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -11,14 +7,23 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
         use_sql_comments: true
+        # MySQL 배치 처리 최적화
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
   sql:
     init:
       mode: never
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework: WARN
+    org.testcontainers: INFO
+    com.github.dockerjava: WARN
+
 
