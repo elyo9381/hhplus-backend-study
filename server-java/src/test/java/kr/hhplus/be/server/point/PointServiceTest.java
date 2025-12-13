@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.point;
 
+import kr.hhplus.be.server.application.point.PointService;
+import kr.hhplus.be.server.infrastructure.point.persistence.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

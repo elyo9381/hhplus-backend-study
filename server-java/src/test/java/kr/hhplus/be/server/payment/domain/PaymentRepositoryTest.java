@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.payment.domain;
 
-import kr.hhplus.be.server.payment.infrastructure.persistence.PaymentRepositoryImpl;
+import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
+import kr.hhplus.be.server.infrastructure.payment.persistence.PaymentRepositoryImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

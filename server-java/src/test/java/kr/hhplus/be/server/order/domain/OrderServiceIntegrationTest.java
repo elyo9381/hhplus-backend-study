@@ -1,10 +1,12 @@
 package kr.hhplus.be.server.order.domain;
 
-import kr.hhplus.be.server.order.application.OrderService;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequest;
-import kr.hhplus.be.server.product.ProductEntity;
-import kr.hhplus.be.server.product.ProductRepository;
-import kr.hhplus.be.server.product.ProductService;
+import kr.hhplus.be.server.application.order.OrderService;
+import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductRepository;
+import kr.hhplus.be.server.application.product.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

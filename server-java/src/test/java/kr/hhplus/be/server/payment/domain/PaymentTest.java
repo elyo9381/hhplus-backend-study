@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.payment.domain;
 
+import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
+import kr.hhplus.be.server.domain.payment.PaymentType;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.point;
 
+import kr.hhplus.be.server.infrastructure.point.persistence.PointEntity;
+import kr.hhplus.be.server.infrastructure.point.persistence.PointRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

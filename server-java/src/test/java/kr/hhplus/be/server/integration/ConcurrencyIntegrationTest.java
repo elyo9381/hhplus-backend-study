@@ -1,13 +1,12 @@
 package kr.hhplus.be.server.integration;
 
-import kr.hhplus.be.server.order.domain.Order;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequest;
-import kr.hhplus.be.server.order.application.OrderService;
-import kr.hhplus.be.server.payment.domain.Payment;
-import kr.hhplus.be.server.payment.application.PaymentService;
-import kr.hhplus.be.server.point.PointService;
-import kr.hhplus.be.server.product.ProductEntity;
-import kr.hhplus.be.server.product.ProductService;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
+import kr.hhplus.be.server.application.order.OrderService;
+import kr.hhplus.be.server.application.payment.PaymentService;
+import kr.hhplus.be.server.application.point.PointService;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.application.product.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;

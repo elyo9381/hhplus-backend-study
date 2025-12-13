@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.product;
 
+import kr.hhplus.be.server.application.product.ProductService;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.presentation.product.ProductController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

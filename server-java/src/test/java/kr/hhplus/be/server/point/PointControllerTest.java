@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.point;
 
+import kr.hhplus.be.server.application.point.PointService;
+import kr.hhplus.be.server.infrastructure.point.persistence.PointEntity;
+import kr.hhplus.be.server.presentation.point.PointController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

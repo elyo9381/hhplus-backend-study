@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.payment.domain;
 
-import kr.hhplus.be.server.payment.infrastructure.persistence.PaymentEntity;
+import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
+import kr.hhplus.be.server.domain.payment.PaymentType;
+import kr.hhplus.be.server.infrastructure.payment.persistence.PaymentEntity;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
