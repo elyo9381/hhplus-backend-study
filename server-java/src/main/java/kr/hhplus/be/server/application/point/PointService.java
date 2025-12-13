@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
-import kr.hhplus.be.server.domain.payment.PointPort;
+import kr.hhplus.be.server.application.payment.PointPort;
 import kr.hhplus.be.server.infrastructure.point.persistence.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

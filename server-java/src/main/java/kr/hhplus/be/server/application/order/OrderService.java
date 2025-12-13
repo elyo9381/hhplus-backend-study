@@ -4,7 +4,6 @@ import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderItem;
 import kr.hhplus.be.server.domain.order.OrderRepository;
-import kr.hhplus.be.server.domain.order.ProductPort;
 import kr.hhplus.be.server.domain.product.ProductSnapshot;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

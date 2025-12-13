@@ -2,6 +2,7 @@ package kr.hhplus.be.server.order.domain;
 
 import kr.hhplus.be.server.application.order.OrderService;
 import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
+import kr.hhplus.be.server.application.order.ProductPort;
 import kr.hhplus.be.server.domain.order.*;
 import kr.hhplus.be.server.domain.product.ProductSnapshot;
 import org.junit.jupiter.api.Test;

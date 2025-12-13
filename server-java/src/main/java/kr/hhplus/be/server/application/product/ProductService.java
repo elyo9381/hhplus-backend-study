@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.application.product;
 
-import kr.hhplus.be.server.domain.order.ProductPort;
+import kr.hhplus.be.server.application.order.ProductPort;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductRepository;
 import kr.hhplus.be.server.domain.product.ProductSnapshot;
