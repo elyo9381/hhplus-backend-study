@@ -67,7 +67,11 @@ public class PaymentService {
         payment.complete();
         Payment savedPayment = paymentRepository.save(payment);
 
-        // 7. Outbox 이벤트 저장 (Order 상태 변경은 이벤트로)
+        // 7. 주문 상태 변경 (같은 트랜잭션)
+        order.completePayment(amount);
+        orderRepository.save(order);
+
+        // 8. Outbox 이벤트 저장
         Outbox outbox = new Outbox(
                 "PAYMENT_COMPLETED",
                 savedPayment.getId(),
@@ -75,7 +79,8 @@ public class PaymentService {
                         "paymentId", savedPayment.getId().toString(),
                         "orderId", orderId.toString(),
                         "userId", userId.toString(),
-                        "amount", amount
+                        "amount", amount,
+                        "orderStatus", "PAID"
                 ))
         );
         outboxRepository.save(outbox);
