@@ -12,6 +12,13 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
+
+# 외부 API 설정
+external:
+  api:
+    url: http://localhost:9090  # 외부 데이터 플랫폼 URL
+
