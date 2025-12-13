@@ -1,13 +1,17 @@
 package kr.hhplus.be.server.application.payment;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.domain.outbox.Outbox;
+import kr.hhplus.be.server.domain.outbox.OutboxRepository;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,13 +21,19 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final PointPort pointPort;
+    private final OutboxRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
     public PaymentService(PaymentRepository paymentRepository,
                           OrderRepository orderRepository,
-                          PointPort pointPort) {
+                          PointPort pointPort,
+                          OutboxRepository outboxRepository,
+                          ObjectMapper objectMapper) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.pointPort = pointPort;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -57,10 +67,27 @@ public class PaymentService {
         payment.complete();
         Payment savedPayment = paymentRepository.save(payment);
 
-        // 7. 주문 상태 변경
-        order.completePayment(amount);
-        orderRepository.save(order);
+        // 7. Outbox 이벤트 저장 (Order 상태 변경은 이벤트로)
+        Outbox outbox = new Outbox(
+                "PAYMENT_COMPLETED",
+                savedPayment.getId(),
+                toJson(Map.of(
+                        "paymentId", savedPayment.getId().toString(),
+                        "orderId", orderId.toString(),
+                        "userId", userId.toString(),
+                        "amount", amount
+                ))
+        );
+        outboxRepository.save(outbox);
 
         return savedPayment;
+    }
+
+    private String toJson(Object obj) {
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize to JSON", e);
+        }
     }
 }

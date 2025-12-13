@@ -4,26 +4,18 @@ import kr.hhplus.be.server.application.order.OrderService;
 import kr.hhplus.be.server.application.order.dto.CreateOrderRequest;
 import kr.hhplus.be.server.application.order.dto.OrderResponse;
 import kr.hhplus.be.server.domain.order.Order;
-import kr.hhplus.be.server.application.payment.PaymentService;
-import kr.hhplus.be.server.application.payment.dto.PaymentRequest;
-import kr.hhplus.be.server.application.payment.dto.PaymentResponse;
-import kr.hhplus.be.server.domain.payment.Payment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
 
     private final OrderService orderService;
-    private final PaymentService paymentService;
 
-    public OrderController(OrderService orderService, PaymentService paymentService) {
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
-        this.paymentService = paymentService;
     }
 
     @PostMapping
@@ -31,13 +23,5 @@ public class OrderController {
         Order order = orderService.createOrder(request.userId(), request.items());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(OrderResponse.from(order));
-    }
-
-    @PostMapping("/{orderId}/payment")
-    public ResponseEntity<PaymentResponse> executePayment(
-            @PathVariable UUID orderId,
-            @RequestBody PaymentRequest request) {
-        Payment payment = paymentService.executePayment(orderId, request.userId());
-        return ResponseEntity.ok(PaymentResponse.from(payment));
     }
 }
