@@ -7,11 +7,15 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
  * Product JPA Entity
+ * 
+ * 레이어드 아키텍처 호환: 직접 생성 및 비즈니스 로직 포함
+ * 클린 아키텍처 호환: Domain 변환 메서드 제공
  */
 @Entity
 @Table(name = "products")
@@ -30,10 +34,10 @@ public class ProductEntity {
     private String description;
 
     @Column(nullable = false)
-    private Long price;
+    private BigDecimal price;
 
     @Column(nullable = false)
-    private Integer stock;
+    private int stock;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -45,13 +49,39 @@ public class ProductEntity {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // Domain → Entity 변환
+    // 레이어드 아키텍처용 생성자
+    public ProductEntity(String name, String description, BigDecimal price, int stock) {
+        this.id = UUID.randomUUID();
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+        this.status = stock > 0 ? ProductStatus.SELLING : ProductStatus.SOLDOUT;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 레이어드 아키텍처용 비즈니스 로직
+    public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new IllegalArgumentException("Insufficient stock");
+        }
+        this.stock -= quantity;
+        updateStatus();
+    }
+
+    private void updateStatus() {
+        this.status = this.stock > 0 ? ProductStatus.SELLING : ProductStatus.SOLDOUT;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 클린 아키텍처용: Domain → Entity 변환
     public static ProductEntity from(Product product) {
         ProductEntity entity = new ProductEntity();
         entity.id = product.getId();
         entity.name = product.getName();
         entity.description = product.getDescription();
-        entity.price = product.getPrice();
+        entity.price = BigDecimal.valueOf(product.getPrice());
         entity.stock = product.getStock();
         entity.status = product.getStatus();
         entity.createdAt = product.getCreatedAt();
@@ -59,13 +89,13 @@ public class ProductEntity {
         return entity;
     }
 
-    // Entity → Domain 변환
+    // 클린 아키텍처용: Entity → Domain 변환
     public Product toDomain() {
         return new Product(
             this.id,
             this.name,
             this.description,
-            this.price,
+            this.price.longValue(),
             this.stock,
             this.status,
             this.createdAt,

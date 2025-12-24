@@ -3,7 +3,7 @@ package kr.hhplus.be.server.outbox;
 import kr.hhplus.be.server.infrastructure.point.persistence.PointEntity;
 import kr.hhplus.be.server.infrastructure.point.persistence.PointRepository;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
-import kr.hhplus.be.server.infrastructure.product.persistence.ProductRepository;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductJpaRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +14,11 @@ import java.util.UUID;
 @Component
 public class OutboxTestHelper {
 
-    private final ProductRepository productRepository;
+    private final ProductJpaRepository productRepository;
     private final PointRepository pointRepository;
     private final JdbcTemplate jdbcTemplate;
 
-    public OutboxTestHelper(ProductRepository productRepository,
+    public OutboxTestHelper(ProductJpaRepository productRepository,
                            PointRepository pointRepository,
                            JdbcTemplate jdbcTemplate) {
         this.productRepository = productRepository;

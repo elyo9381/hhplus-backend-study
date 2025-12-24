@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.order.domain;
 
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
-import kr.hhplus.be.server.infrastructure.product.persistence.ProductRepository;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class OrderConcurrencyTest {
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductJpaRepository productRepository;
 
     @Autowired
     private PlatformTransactionManager transactionManager;

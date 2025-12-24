@@ -5,7 +5,7 @@ import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
-import kr.hhplus.be.server.infrastructure.product.persistence.ProductRepository;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductJpaRepository;
 import kr.hhplus.be.server.application.product.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class OrderServiceIntegrationTest {
     private ProductService productService;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductJpaRepository productRepository;
 
     @Autowired
     private OrderRepository orderRepository;
