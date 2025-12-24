@@ -26,6 +26,9 @@ public class PaymentEntity {
     @Column(nullable = false)
     private UUID userId;
 
+    @Column(nullable = false, unique = true)
+    private String idempotencyKey;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentType paymentType;
@@ -46,12 +49,13 @@ public class PaymentEntity {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public PaymentEntity(UUID id, UUID orderId, UUID userId, PaymentType paymentType,
+    public PaymentEntity(UUID id, UUID orderId, UUID userId, String idempotencyKey, PaymentType paymentType,
                          Long amount, Long pointAmount, PaymentStatus status,
                          LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.orderId = orderId;
         this.userId = userId;
+        this.idempotencyKey = idempotencyKey;
         this.paymentType = paymentType;
         this.amount = amount;
         this.pointAmount = pointAmount;
@@ -65,6 +69,7 @@ public class PaymentEntity {
                 this.id,
                 this.orderId,
                 this.userId,
+                this.idempotencyKey,
                 this.paymentType,
                 this.amount,
                 this.pointAmount,
@@ -79,6 +84,7 @@ public class PaymentEntity {
                 payment.getId(),
                 payment.getOrderId(),
                 payment.getUserId(),
+                payment.getIdempotencyKey(),
                 payment.getPaymentType(),
                 payment.getAmount(),
                 payment.getPointAmount(),

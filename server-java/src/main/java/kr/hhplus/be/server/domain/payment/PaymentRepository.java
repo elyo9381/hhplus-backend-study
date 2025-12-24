@@ -7,4 +7,5 @@ public interface PaymentRepository {
     Payment save(Payment payment);
     Optional<Payment> findById(UUID id);
     Optional<Payment> findByOrderId(UUID orderId);
+    Optional<Payment> findByIdempotencyKey(String idempotencyKey);
 }

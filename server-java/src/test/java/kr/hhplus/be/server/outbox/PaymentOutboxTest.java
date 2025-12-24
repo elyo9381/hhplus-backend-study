@@ -70,7 +70,7 @@ class PaymentOutboxTest extends AbstractIntegrationTest {
         ));
 
         // When
-        Payment payment = paymentService.executePayment(order.getId(), userId);
+        Payment payment = paymentService.executePayment(order.getId(), userId, UUID.randomUUID().toString());
 
         // Then
         assertThat(payment.getStatus().name()).isEqualTo("SUCCESS");
@@ -104,7 +104,7 @@ class PaymentOutboxTest extends AbstractIntegrationTest {
         ));
 
         // When: 결제 실행
-        Payment payment = paymentService.executePayment(order.getId(), userId);
+        Payment payment = paymentService.executePayment(order.getId(), userId, UUID.randomUUID().toString());
 
         // Then: Outbox 발행
         outboxScheduler.publishPendingEvents();
@@ -147,7 +147,7 @@ class PaymentOutboxTest extends AbstractIntegrationTest {
 
         // When & Then
         try {
-            paymentService.executePayment(order.getId(), wrongUserId);
+            paymentService.executePayment(order.getId(), wrongUserId, UUID.randomUUID().toString());
         } catch (IllegalArgumentException e) {
             // 예외 발생 예상
         }
@@ -169,7 +169,7 @@ class PaymentOutboxTest extends AbstractIntegrationTest {
         ));
 
         // When
-        paymentService.executePayment(order.getId(), userId);
+        paymentService.executePayment(order.getId(), userId, UUID.randomUUID().toString());
 
         // Then
         List<Outbox> outboxes = outboxRepository

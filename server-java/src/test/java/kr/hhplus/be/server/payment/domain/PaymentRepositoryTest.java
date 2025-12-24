@@ -6,8 +6,13 @@ import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.infrastructure.payment.persistence.PaymentRepositoryImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -15,8 +20,14 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(PaymentRepositoryImpl.class)
 class PaymentRepositoryTest {
+
+    @Container
+    @ServiceConnection
+    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0.40");
 
     @Autowired
     private PaymentRepository paymentRepository;
@@ -26,7 +37,7 @@ class PaymentRepositoryTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        Payment payment = new Payment(orderId, userId, UUID.randomUUID().toString(), 50000L, 50000L);
 
         // when
         Payment saved = paymentRepository.save(payment);
@@ -46,7 +57,7 @@ class PaymentRepositoryTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        Payment payment = new Payment(orderId, userId, UUID.randomUUID().toString(), 50000L, 50000L);
         paymentRepository.save(payment);
 
         // when
@@ -86,7 +97,7 @@ class PaymentRepositoryTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        Payment payment = new Payment(orderId, userId, UUID.randomUUID().toString(), 50000L, 50000L);
         Payment saved = paymentRepository.save(payment);
 
         // when

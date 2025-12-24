@@ -10,6 +10,7 @@ public class Payment {
     private final UUID id;
     private final UUID orderId;
     private final UUID userId;
+    private final String idempotencyKey;
     private final PaymentType paymentType;
     private final Long amount;
     private final Long pointAmount;
@@ -18,10 +19,11 @@ public class Payment {
     private LocalDateTime updatedAt;
 
     // 결제 생성 시 사용하는 생성자
-    public Payment(UUID orderId, UUID userId, Long amount, Long pointAmount) {
+    public Payment(UUID orderId, UUID userId, String idempotencyKey, Long amount, Long pointAmount) {
         this.id = UUID.randomUUID();
         this.orderId = orderId;
         this.userId = userId;
+        this.idempotencyKey = idempotencyKey;
         this.paymentType = PaymentType.POINT;
         this.amount = amount;
         this.pointAmount = pointAmount;
@@ -31,12 +33,13 @@ public class Payment {
     }
 
     // Entity에서 도메인으로 변환 시 사용하는 생성자
-    public Payment(UUID id, UUID orderId, UUID userId, PaymentType paymentType,
+    public Payment(UUID id, UUID orderId, UUID userId, String idempotencyKey, PaymentType paymentType,
                    Long amount, Long pointAmount, PaymentStatus status,
                    LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.orderId = orderId;
         this.userId = userId;
+        this.idempotencyKey = idempotencyKey;
         this.paymentType = paymentType;
         this.amount = amount;
         this.pointAmount = pointAmount;

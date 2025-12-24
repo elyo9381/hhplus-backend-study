@@ -208,7 +208,7 @@ class ConcurrencyIntegrationTest {
         // 결제 시도 (실패 예상)
         AtomicInteger failCount = new AtomicInteger(0);
         try {
-            paymentService.executePayment(order.getId(), userId);
+            paymentService.executePayment(order.getId(), userId, UUID.randomUUID().toString());
         } catch (IllegalArgumentException e) {
             if (e.getMessage().equals("Insufficient point balance")) {
                 failCount.incrementAndGet();
@@ -243,7 +243,7 @@ class ConcurrencyIntegrationTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    paymentService.executePayment(order.getId(), userId);
+                    paymentService.executePayment(order.getId(), userId, UUID.randomUUID().toString());
                     successCount.incrementAndGet();
                 } catch (IllegalStateException e) {
                     if (e.getMessage().equals("Payment already exists")) {

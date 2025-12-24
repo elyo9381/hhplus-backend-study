@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public record PaymentRequest(
         UUID orderId,
-        UUID userId
+        UUID userId,
+        String idempotencyKey
 ) {
 }

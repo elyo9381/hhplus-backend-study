@@ -19,7 +19,11 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<PaymentResponse> executePayment(@RequestBody PaymentRequest request) {
-        Payment payment = paymentService.executePayment(request.orderId(), request.userId());
+        Payment payment = paymentService.executePayment(
+                request.orderId(), 
+                request.userId(),
+                request.idempotencyKey()
+        );
         return ResponseEntity.ok(PaymentResponse.from(payment));
     }
 }

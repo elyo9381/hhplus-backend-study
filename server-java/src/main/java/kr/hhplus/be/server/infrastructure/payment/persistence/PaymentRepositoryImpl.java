@@ -35,4 +35,10 @@ public class PaymentRepositoryImpl implements PaymentRepository {
         return jpaRepository.findByOrderId(orderId)
                 .map(PaymentEntity::toDomain);
     }
+
+    @Override
+    public Optional<Payment> findByIdempotencyKey(String idempotencyKey) {
+        return jpaRepository.findByIdempotencyKey(idempotencyKey)
+                .map(PaymentEntity::toDomain);
+    }
 }
