@@ -24,6 +24,14 @@ public class OutboxRepositoryImpl implements OutboxRepository {
     }
 
     @Override
+    public List<Outbox> findByStatus(OutboxStatus status) {
+        return jpaRepository.findByStatus(status)
+                .stream()
+                .map(OutboxEntity::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<Outbox> findByStatusAndRetryCountLessThan(OutboxStatus status, int maxRetryCount) {
         return jpaRepository.findByStatusAndRetryCountLessThan(status, maxRetryCount)
                 .stream()

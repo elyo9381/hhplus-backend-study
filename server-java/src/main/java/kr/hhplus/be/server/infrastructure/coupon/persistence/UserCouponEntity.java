@@ -12,19 +12,18 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "user_coupons", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "couponId"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "coupon_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserCouponEntity {
 
     @Id
-    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(nullable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(nullable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "coupon_id", nullable = false)
     private UUID couponId;
 
     @Column(nullable = false)

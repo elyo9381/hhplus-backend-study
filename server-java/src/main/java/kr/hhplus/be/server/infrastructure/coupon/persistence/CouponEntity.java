@@ -17,7 +17,6 @@ import java.util.UUID;
 public class CouponEntity {
 
     @Id
-    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Column(nullable = false)

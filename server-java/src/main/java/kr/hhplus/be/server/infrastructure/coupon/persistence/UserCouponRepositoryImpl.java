@@ -18,7 +18,7 @@ public class UserCouponRepositoryImpl implements UserCouponRepository {
     @Override
     public UserCoupon save(UserCoupon userCoupon) {
         UserCouponEntity entity = UserCouponEntity.from(userCoupon);
-        UserCouponEntity saved = jpaRepository.save(entity);
+        UserCouponEntity saved = jpaRepository.saveAndFlush(entity);
         return saved.toDomain();
     }
 

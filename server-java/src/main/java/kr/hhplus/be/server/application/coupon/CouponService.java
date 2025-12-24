@@ -2,6 +2,7 @@ package kr.hhplus.be.server.application.coupon;
 
 import kr.hhplus.be.server.domain.coupon.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +30,11 @@ public class CouponService {
     /**
      * 선착순 쿠폰 발급
      * 
-     * 비관적 락으로 동시성 제어
+     * 비관적 락 + unique constraint로 동시성 제어
      */
     @Transactional
     public UserCoupon issueCoupon(UUID couponId, UUID userId) {
-        // 1. 중복 발급 체크
+        // 1. 중복 발급 체크 (빠른 실패)
         if (userCouponRepository.existsByUserIdAndCouponId(userId, couponId)) {
             throw new IllegalStateException("이미 발급받은 쿠폰입니다");
         }
@@ -46,9 +47,13 @@ public class CouponService {
         coupon.issue();
         couponRepository.save(coupon);
 
-        // 4. 사용자 쿠폰 생성
-        UserCoupon userCoupon = new UserCoupon(userId, coupon);
-        return userCouponRepository.save(userCoupon);
+        // 4. 사용자 쿠폰 생성 (unique constraint로 중복 방지)
+        try {
+            UserCoupon userCoupon = new UserCoupon(userId, coupon);
+            return userCouponRepository.save(userCoupon);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("이미 발급받은 쿠폰입니다");
+        }
     }
 
     /**

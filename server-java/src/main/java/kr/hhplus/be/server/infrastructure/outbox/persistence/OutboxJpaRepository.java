@@ -7,5 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface OutboxJpaRepository extends JpaRepository<OutboxEntity, UUID> {
+    List<OutboxEntity> findByStatus(OutboxStatus status);
     List<OutboxEntity> findByStatusAndRetryCountLessThan(OutboxStatus status, int maxRetryCount);
 }
