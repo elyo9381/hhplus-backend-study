@@ -70,9 +70,11 @@ tasks.register<Test>("unitTest") {
 	
 	// 통합 테스트 제외
 	exclude("**/integration/**")
-	exclude("**/outbox/**")  // Outbox 테스트는 통합 테스트
+	exclude("**/outbox/**")
 	exclude("**/*IntegrationTest*")
 	exclude("**/*ConcurrencyTest*")
+	exclude("**/SimpleSpringBootTest*")
+	exclude("**/ServerApplicationTests*")
 }
 
 // 통합 테스트만 실행 (Testcontainers 사용)
@@ -85,4 +87,6 @@ tasks.register<Test>("integrationTest") {
 	include("**/outbox/**")
 	include("**/*IntegrationTest*")
 	include("**/*ConcurrencyTest*")
+	include("**/SimpleSpringBootTest*")
+	include("**/ServerApplicationTests*")
 }

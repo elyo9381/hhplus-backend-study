@@ -37,9 +37,9 @@ class ConcurrencyIntegrationTest extends TestContainerSupport {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
-        registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
-        registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
     }
 
     @Autowired

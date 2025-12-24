@@ -23,8 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 쿠폰 선착순 발급 동시성 테스트
- * 
- * 주의: @Transactional 사용 안함 (멀티스레드 환경)
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,9 +30,9 @@ class CouponConcurrencyTest extends TestContainerSupport {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
-        registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
-        registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
     }
 
     @Autowired
