@@ -1,14 +1,18 @@
 package kr.hhplus.be.server.payment.domain;
 
+import kr.hhplus.be.server.TestContainerSupport;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.infrastructure.payment.persistence.PaymentRepositoryImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -17,8 +21,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(PaymentRepositoryImpl.class)
-class PaymentRepositoryTest {
+class PaymentRepositoryTest extends TestContainerSupport {
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+    }
 
     @Autowired
     private PaymentRepository paymentRepository;

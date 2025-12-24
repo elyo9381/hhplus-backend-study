@@ -63,16 +63,17 @@ tasks.withType<Test> {
 	jvmArgs("-Xmx1024m")
 }
 
-// 단위 테스트만 실행 (빠름, H2 사용)
+// 단위 테스트만 실행 (빠름, Mock 기반)
 tasks.register<Test>("unitTest") {
 	useJUnitPlatform()
 	systemProperty("user.timezone", "UTC")
 	
-	// 통합 테스트 제외
+	// DB 필요한 테스트 제외
 	exclude("**/integration/**")
 	exclude("**/outbox/**")
 	exclude("**/*IntegrationTest*")
 	exclude("**/*ConcurrencyTest*")
+	exclude("**/*RepositoryTest*")
 	exclude("**/SimpleSpringBootTest*")
 	exclude("**/ServerApplicationTests*")
 }
@@ -82,11 +83,12 @@ tasks.register<Test>("integrationTest") {
 	useJUnitPlatform()
 	systemProperty("user.timezone", "UTC")
 	
-	// 통합 테스트만 포함
+	// DB 필요한 테스트 포함
 	include("**/integration/**")
 	include("**/outbox/**")
 	include("**/*IntegrationTest*")
 	include("**/*ConcurrencyTest*")
+	include("**/*RepositoryTest*")
 	include("**/SimpleSpringBootTest*")
 	include("**/ServerApplicationTests*")
 }

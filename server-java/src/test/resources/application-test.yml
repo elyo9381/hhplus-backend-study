@@ -6,15 +6,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  # H2 인메모리 DB (단위 테스트용)
-  datasource:
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  test:
-    database:
-      replace: auto
 logging:
   level:
     org.hibernate.SQL: DEBUG
