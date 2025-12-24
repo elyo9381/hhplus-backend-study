@@ -9,8 +9,17 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
-    
+/**
+ * Product JPA Repository
+ */
+public interface ProductJpaRepository extends JpaRepository<ProductEntity, UUID> {
+
+    /**
+     * 비관적 락을 사용한 조회
+     * SELECT ... FOR UPDATE
+     * 
+     * 용도: 재고 차감 시 동시성 제어
+     */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM ProductEntity p WHERE p.id = :id")
     Optional<ProductEntity> findByIdWithLock(@Param("id") UUID id);

@@ -1,9 +1,8 @@
 package kr.hhplus.be.server.presentation.product;
 
-import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
-import kr.hhplus.be.server.infrastructure.product.persistence.ProductStatus;
+import kr.hhplus.be.server.domain.product.Product;
+import kr.hhplus.be.server.domain.product.ProductStatus;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,22 +10,22 @@ public record ProductResponse(
         UUID id,
         String name,
         String description,
-        BigDecimal price,
-        int stock,
+        Long price,
+        Integer stock,
         ProductStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    public static ProductResponse from(ProductEntity entity) {
+    public static ProductResponse from(Product product) {
         return new ProductResponse(
-                entity.getId(),
-                entity.getName(),
-                entity.getDescription(),
-                entity.getPrice(),
-                entity.getStock(),
-                entity.getStatus(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStock(),
+                product.getStatus(),
+                product.getCreatedAt(),
+                product.getUpdatedAt()
         );
     }
 }
