@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.coupon;
 
+import kr.hhplus.be.server.TestContainerSupport;
 import kr.hhplus.be.server.application.coupon.CouponService;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponStatus;
@@ -7,11 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,16 +27,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 주의: @Transactional 사용 안함 (멀티스레드 환경)
  */
 @SpringBootTest
-@Testcontainers
 @ActiveProfiles("test")
-class CouponConcurrencyTest {
+class CouponConcurrencyTest extends TestContainerSupport {
 
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0.40")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
+    }
 
     @Autowired
     private CouponService couponService;

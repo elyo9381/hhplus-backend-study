@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.integration;
 
+import kr.hhplus.be.server.TestContainerSupport;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
 import kr.hhplus.be.server.application.order.OrderService;
@@ -9,9 +10,11 @@ import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
 import kr.hhplus.be.server.application.product.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,9 +33,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - ADR-016: 트랜잭션 원자성
  */
 @SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class ConcurrencyIntegrationTest {
+class ConcurrencyIntegrationTest extends TestContainerSupport {
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
+    }
 
     @Autowired
     private OrderService orderService;
