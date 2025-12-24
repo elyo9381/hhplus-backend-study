@@ -4,7 +4,6 @@ import kr.hhplus.be.server.infrastructure.point.persistence.PointEntity;
 import kr.hhplus.be.server.infrastructure.point.persistence.PointRepository;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductJpaRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -16,32 +15,21 @@ public class OutboxTestHelper {
 
     private final ProductJpaRepository productRepository;
     private final PointRepository pointRepository;
-    private final JdbcTemplate jdbcTemplate;
 
     public OutboxTestHelper(ProductJpaRepository productRepository,
-                           PointRepository pointRepository,
-                           JdbcTemplate jdbcTemplate) {
+                           PointRepository pointRepository) {
         this.productRepository = productRepository;
         this.pointRepository = pointRepository;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     public UUID createTestProduct(String name, BigDecimal price, int stock) {
-        UUID productId = UUID.randomUUID();
-        
-        jdbcTemplate.update(
-                "INSERT INTO products (id, name, price, stock, status, created_at, updated_at) " +
-                "VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)",
-                productId, name, price, stock, LocalDateTime.now(), LocalDateTime.now()
-        );
-        
-        return productId;
+        ProductEntity product = new ProductEntity(name, "test", price, stock);
+        ProductEntity saved = productRepository.save(product);
+        return saved.getId();
     }
 
     public void createTestPoint(UUID userId, Long amount) {
-        jdbcTemplate.update(
-                "INSERT INTO user_points (user_id, amount) VALUES (?, ?)",
-                userId, amount
-        );
+        PointEntity point = new PointEntity(userId, amount, LocalDateTime.now().plusYears(1));
+        pointRepository.save(point);
     }
 }
