@@ -29,7 +29,7 @@ class OutboxRetryTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // 테스트용 Outbox 생성
+        outboxRepository.deleteAll();
     }
 
     @Test

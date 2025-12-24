@@ -55,10 +55,11 @@ class PaymentOutboxTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        outboxRepository.deleteAll();
+        mockMessageProducer.clear();
         userId = UUID.randomUUID();
         productId = testHelper.createTestProduct("테스트 상품", BigDecimal.valueOf(10000), 100);
         testHelper.createTestPoint(userId, 100000L);
-        mockMessageProducer.clear();
     }
 
     @Test

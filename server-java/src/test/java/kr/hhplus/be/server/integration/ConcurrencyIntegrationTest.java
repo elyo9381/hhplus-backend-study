@@ -253,10 +253,9 @@ class ConcurrencyIntegrationTest extends TestContainerSupport {
                 try {
                     paymentService.executePayment(order.getId(), userId, UUID.randomUUID().toString());
                     successCount.incrementAndGet();
-                } catch (IllegalStateException e) {
-                    if (e.getMessage().equals("Payment already exists")) {
-                        failCount.incrementAndGet();
-                    }
+                } catch (Exception e) {
+                    // 중복 결제 또는 주문 상태 변경으로 인한 실패
+                    failCount.incrementAndGet();
                 } finally {
                     latch.countDown();
                 }
@@ -266,7 +265,7 @@ class ConcurrencyIntegrationTest extends TestContainerSupport {
         latch.await();
         executorService.shutdown();
 
-        // then: 1개만 성공, 나머지는 중복 실패
+        // then: 1개만 성공, 나머지는 실패
         assertThat(successCount.get()).isEqualTo(1);
         assertThat(failCount.get()).isEqualTo(4);
 

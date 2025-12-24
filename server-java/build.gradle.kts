@@ -56,8 +56,8 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 	systemProperty("user.timezone", "UTC")
 	
-	// 테스트 병렬 실행 (CPU 코어 수의 절반)
-	maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+	// 테스트 순차 실행
+	maxParallelForks = 1
 	
 	// JVM 메모리 설정
 	jvmArgs("-Xmx1024m")
@@ -74,6 +74,7 @@ tasks.register<Test>("unitTest") {
 	exclude("**/*IntegrationTest*")
 	exclude("**/*ConcurrencyTest*")
 	exclude("**/*RepositoryTest*")
+	exclude("**/*LockTest*")
 	exclude("**/SimpleSpringBootTest*")
 	exclude("**/ServerApplicationTests*")
 }

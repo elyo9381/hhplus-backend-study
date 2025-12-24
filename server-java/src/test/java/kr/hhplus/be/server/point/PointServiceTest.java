@@ -37,7 +37,7 @@ class PointServiceTest {
         Long amount = 10000L;
         
         PointEntity savedPoint = new PointEntity(userId, amount, LocalDateTime.now().plusYears(1));
-        when(pointRepository.findByUserIdAndExpiredAtAfterOrderByExpiredAtAsc(eq(userId), any(LocalDateTime.class)))
+        when(pointRepository.findByUserIdAndExpiredAtAfterReadOnly(eq(userId), any(LocalDateTime.class)))
                 .thenReturn(List.of());
         when(pointRepository.save(any(PointEntity.class))).thenReturn(savedPoint);
 
@@ -57,7 +57,7 @@ class PointServiceTest {
         Long amount = 5000L;
         
         PointEntity existingPoint = new PointEntity(userId, 10000L, LocalDateTime.now().plusYears(1));
-        when(pointRepository.findByUserIdAndExpiredAtAfterOrderByExpiredAtAsc(eq(userId), any(LocalDateTime.class)))
+        when(pointRepository.findByUserIdAndExpiredAtAfterReadOnly(eq(userId), any(LocalDateTime.class)))
                 .thenReturn(List.of(existingPoint));
         when(pointRepository.save(any(PointEntity.class)))
                 .thenReturn(new PointEntity(userId, amount, LocalDateTime.now().plusYears(1)));
@@ -83,7 +83,7 @@ class PointServiceTest {
                 new PointEntity(userId, 10000L, LocalDateTime.now().plusDays(10)),
                 new PointEntity(userId, 5000L, LocalDateTime.now().plusDays(5))
         );
-        when(pointRepository.findByUserIdAndExpiredAtAfterOrderByExpiredAtAsc(eq(userId), any(LocalDateTime.class)))
+        when(pointRepository.findByUserIdAndExpiredAtAfterReadOnly(eq(userId), any(LocalDateTime.class)))
                 .thenReturn(points);
 
         // when
@@ -97,7 +97,7 @@ class PointServiceTest {
     void shouldReturnZeroWhenNoPoints() {
         // given
         UUID userId = UUID.randomUUID();
-        when(pointRepository.findByUserIdAndExpiredAtAfterOrderByExpiredAtAsc(eq(userId), any(LocalDateTime.class)))
+        when(pointRepository.findByUserIdAndExpiredAtAfterReadOnly(eq(userId), any(LocalDateTime.class)))
                 .thenReturn(List.of());
 
         // when

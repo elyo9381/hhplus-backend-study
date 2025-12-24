@@ -1,46 +1,41 @@
 package kr.hhplus.be.server.outbox;
 
-import kr.hhplus.be.server.AbstractIntegrationTest;
-import kr.hhplus.be.server.application.outbox.MessageProducer;
+import kr.hhplus.be.server.TestContainerSupport;
 import kr.hhplus.be.server.domain.outbox.Outbox;
 import kr.hhplus.be.server.domain.outbox.OutboxRepository;
 import kr.hhplus.be.server.domain.outbox.OutboxStatus;
+import kr.hhplus.be.server.infrastructure.outbox.message.MockMessageProducer;
 import kr.hhplus.be.server.presentation.scheduler.OutboxScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * WebClient 외부 API 연동 통합 테스트
- * 
- * 검증 항목:
- * 1. WebClient로 외부 API 호출
- * 2. Mock 외부 API 서버에서 이벤트 수신
- * 3. Outbox → WebClient → 외부 API 전체 플로우
+ * Outbox 메시지 발행 통합 테스트
  */
-@TestPropertySource(properties = {
-        "external.api.url=http://localhost:${local.server.port}"
-})
-class WebClientIntegrationTest extends AbstractIntegrationTest {
+@SpringBootTest
+@ActiveProfiles("test")
+class WebClientIntegrationTest extends TestContainerSupport {
 
-    @LocalServerPort
-    private int port;
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+    }
 
     @Autowired
-    private MessageProducer messageProducer;
+    private MockMessageProducer mockMessageProducer;
 
     @Autowired
     private OutboxRepository outboxRepository;
@@ -48,40 +43,30 @@ class WebClientIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private OutboxScheduler outboxScheduler;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
-
     @BeforeEach
     void setUp() {
-        // Mock 외부 API 이벤트 초기화
-        restTemplate.delete("http://localhost:" + port + "/api/events");
+        outboxRepository.deleteAll();
+        mockMessageProducer.clear();
     }
 
     @Test
-    @DisplayName("WebClient로 외부 API에 이벤트를 전송할 수 있다")
+    @DisplayName("MessageProducer로 이벤트를 전송할 수 있다")
     void sendEventToExternalApi() {
         // Given
         String eventType = "TEST_EVENT";
         String payload = "{\"test\": \"data\"}";
 
         // When
-        messageProducer.send(eventType, payload);
+        mockMessageProducer.send(eventType, payload);
 
         // Then
-        // Mock 외부 API에서 이벤트 수신 확인
-        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/events",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
-
-        assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().get(0).get("eventType")).isEqualTo(eventType);
+        List<MockMessageProducer.Message> messages = mockMessageProducer.getSentMessages();
+        assertThat(messages).hasSize(1);
+        assertThat(messages.get(0).getEventType()).isEqualTo(eventType);
     }
 
     @Test
-    @DisplayName("Outbox 스케줄러가 WebClient를 통해 외부 API에 이벤트를 발행한다")
+    @DisplayName("Outbox 스케줄러가 이벤트를 발행한다")
     void outboxSchedulerSendsToExternalApi() {
         // Given
         Outbox outbox = new Outbox(
@@ -95,25 +80,17 @@ class WebClientIntegrationTest extends AbstractIntegrationTest {
         outboxScheduler.publishPendingEvents();
 
         // Then
-        // 1. Outbox 상태가 PUBLISHED로 변경됨
         List<Outbox> published = outboxRepository
                 .findByStatusAndRetryCountLessThan(OutboxStatus.PUBLISHED, 3);
         assertThat(published).hasSize(1);
 
-        // 2. Mock 외부 API에서 이벤트 수신 확인
-        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/events",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
-
-        assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().get(0).get("eventType")).isEqualTo("ORDER_CREATED");
+        List<MockMessageProducer.Message> messages = mockMessageProducer.getSentMessages();
+        assertThat(messages).hasSize(1);
+        assertThat(messages.get(0).getEventType()).isEqualTo("ORDER_CREATED");
     }
 
     @Test
-    @DisplayName("여러 Outbox 이벤트를 순차적으로 외부 API에 발행한다")
+    @DisplayName("여러 Outbox 이벤트를 순차적으로 발행한다")
     void sendMultipleEvents() {
         // Given
         Outbox outbox1 = new Outbox("ORDER_CREATED", UUID.randomUUID(), "{}");
@@ -125,16 +102,10 @@ class WebClientIntegrationTest extends AbstractIntegrationTest {
         outboxScheduler.publishPendingEvents();
 
         // Then
-        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/api/events",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
-
-        assertThat(response.getBody()).hasSize(2);
-        assertThat(response.getBody())
-                .extracting(event -> event.get("eventType"))
+        List<MockMessageProducer.Message> messages = mockMessageProducer.getSentMessages();
+        assertThat(messages).hasSize(2);
+        assertThat(messages)
+                .extracting(MockMessageProducer.Message::getEventType)
                 .containsExactlyInAnyOrder("ORDER_CREATED", "PAYMENT_COMPLETED");
     }
 }

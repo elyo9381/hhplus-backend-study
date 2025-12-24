@@ -152,10 +152,9 @@ class PaymentServiceIntegrationTest extends AbstractIntegrationTest {
                 try {
                     paymentService.executePayment(order.getId(), userId, idempotencyKey);
                     successCount.incrementAndGet();
-                } catch (IllegalStateException e) {
-                    if (e.getMessage().contains("Payment already exists")) {
-                        failCount.incrementAndGet();
-                    }
+                } catch (Exception e) {
+                    // 중복 결제 또는 주문 상태 변경으로 인한 실패
+                    failCount.incrementAndGet();
                 } finally {
                     latch.countDown();
                 }

@@ -43,7 +43,7 @@ public class PointService implements PointPort {
     @Transactional(readOnly = true)
     public Long getAvailablePoints(UUID userId) {
         LocalDateTime now = LocalDateTime.now();
-        return pointRepository.findByUserIdAndExpiredAtAfterOrderByExpiredAtAsc(userId, now)
+        return pointRepository.findByUserIdAndExpiredAtAfterReadOnly(userId, now)
                 .stream()
                 .mapToLong(PointEntity::getAmount)
                 .sum();
