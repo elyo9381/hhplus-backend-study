@@ -26,7 +26,6 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@Primary
 public class WebClientMessageProducer implements MessageProducer {
 
     private final WebClient webClient;

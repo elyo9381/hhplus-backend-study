@@ -38,4 +38,9 @@ public class OutboxRepositoryImpl implements OutboxRepository {
                 .map(OutboxEntity::toDomain)
                 .toList();
     }
+
+    @Override
+    public void deleteAll() {
+        jpaRepository.deleteAll();
+    }
 }

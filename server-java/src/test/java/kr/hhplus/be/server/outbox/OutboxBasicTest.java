@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.outbox;
 
-import kr.hhplus.be.server.AbstractIntegrationTest;
+import kr.hhplus.be.server.TestContainerSupport;
 import kr.hhplus.be.server.domain.outbox.Outbox;
 import kr.hhplus.be.server.domain.outbox.OutboxRepository;
 import kr.hhplus.be.server.domain.outbox.OutboxStatus;
@@ -10,6 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +23,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Outbox 기본 기능 테스트
  */
-class OutboxBasicTest extends AbstractIntegrationTest {
+@SpringBootTest
+@ActiveProfiles("test")
+class OutboxBasicTest extends TestContainerSupport {
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+    }
 
     @Autowired
     private OutboxRepository outboxRepository;
@@ -32,6 +45,7 @@ class OutboxBasicTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        outboxRepository.deleteAll();
         mockMessageProducer.clear();
     }
 

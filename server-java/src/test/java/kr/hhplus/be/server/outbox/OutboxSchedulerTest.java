@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.outbox;
 
-import kr.hhplus.be.server.AbstractIntegrationTest;
+import kr.hhplus.be.server.TestContainerSupport;
 import kr.hhplus.be.server.application.order.OrderService;
 import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
 import kr.hhplus.be.server.domain.order.Order;
@@ -13,6 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,13 +27,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * OutboxScheduler 발행 테스트
  * 
- * 검증 항목:
- * 1. PENDING 상태의 Outbox 이벤트가 발행됨
- * 2. 발행 후 PUBLISHED 상태로 변경됨
- * 3. MockMessageProducer에 메시지가 전달됨
- * 4. 재시도 메커니즘 동작 확인
+ * 주의: @Transactional 사용 안함 (스케줄러가 별도 트랜잭션 사용)
  */
-class OutboxSchedulerTest extends AbstractIntegrationTest {
+@SpringBootTest
+@ActiveProfiles("test")
+class OutboxSchedulerTest extends TestContainerSupport {
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+    }
 
     @Autowired
     private OrderService orderService;
@@ -51,6 +60,7 @@ class OutboxSchedulerTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        outboxRepository.deleteAll();
         userId = UUID.randomUUID();
         productId = testHelper.createTestProduct("테스트 상품", BigDecimal.valueOf(10000), 100);
         mockMessageProducer.clear();

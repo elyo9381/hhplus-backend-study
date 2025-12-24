@@ -2,6 +2,8 @@ package kr.hhplus.be.server.infrastructure.outbox.message;
 
 import kr.hhplus.be.server.application.outbox.MessageProducer;
 import lombok.Getter;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -10,11 +12,10 @@ import java.util.List;
 
 /**
  * 테스트용 Mock Message Producer
- * 
- * 실제로 외부 시스템에 발행하지 않고 메모리에 기록만 함
- * 테스트에서 메시지 발행 여부 검증 가능
  */
 @Component
+@Profile("test")
+@Primary
 public class MockMessageProducer implements MessageProducer {
 
     @Getter
