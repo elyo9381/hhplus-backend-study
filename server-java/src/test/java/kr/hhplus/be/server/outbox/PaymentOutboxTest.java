@@ -10,7 +10,7 @@ import kr.hhplus.be.server.domain.outbox.OutboxRepository;
 import kr.hhplus.be.server.domain.outbox.OutboxStatus;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.infrastructure.outbox.message.MockMessageProducer;
-import kr.hhplus.be.server.infrastructure.outbox.scheduler.OutboxScheduler;
+import kr.hhplus.be.server.presentation.scheduler.OutboxScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
