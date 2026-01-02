@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.point;
 
+import kr.hhplus.be.server.infrastructure.point.persistence.PointHistoryEntity;
+import kr.hhplus.be.server.infrastructure.point.persistence.PointHistoryType;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

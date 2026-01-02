@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.payment.domain;
 
+import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
+import kr.hhplus.be.server.domain.payment.PaymentType;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -14,16 +17,18 @@ class PaymentTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
+        String idempotencyKey = UUID.randomUUID().toString();
         Long amount = 50000L;
         Long pointAmount = 50000L;
 
         // when
-        Payment payment = new Payment(orderId, userId, amount, pointAmount);
+        Payment payment = new Payment(orderId, userId, idempotencyKey, amount, pointAmount);
 
         // then
         assertThat(payment.getId()).isNotNull();
         assertThat(payment.getOrderId()).isEqualTo(orderId);
         assertThat(payment.getUserId()).isEqualTo(userId);
+        assertThat(payment.getIdempotencyKey()).isEqualTo(idempotencyKey);
         assertThat(payment.getPaymentType()).isEqualTo(PaymentType.POINT);
         assertThat(payment.getAmount()).isEqualTo(50000L);
         assertThat(payment.getPointAmount()).isEqualTo(50000L);
@@ -37,7 +42,8 @@ class PaymentTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        String idempotencyKey = UUID.randomUUID().toString();
+        Payment payment = new Payment(orderId, userId, idempotencyKey, 50000L, 50000L);
 
         // when
         payment.complete();
@@ -51,7 +57,8 @@ class PaymentTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        String idempotencyKey = UUID.randomUUID().toString();
+        Payment payment = new Payment(orderId, userId, idempotencyKey, 50000L, 50000L);
 
         // when
         payment.fail();
@@ -65,7 +72,8 @@ class PaymentTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        String idempotencyKey = UUID.randomUUID().toString();
+        Payment payment = new Payment(orderId, userId, idempotencyKey, 50000L, 50000L);
         payment.complete();
 
         // when & then
@@ -79,7 +87,8 @@ class PaymentTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        String idempotencyKey = UUID.randomUUID().toString();
+        Payment payment = new Payment(orderId, userId, idempotencyKey, 50000L, 50000L);
         payment.fail();
 
         // when & then
@@ -93,7 +102,8 @@ class PaymentTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        String idempotencyKey = UUID.randomUUID().toString();
+        Payment payment = new Payment(orderId, userId, idempotencyKey, 50000L, 50000L);
         payment.complete();
 
         // when & then
@@ -107,7 +117,8 @@ class PaymentTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Payment payment = new Payment(orderId, userId, 50000L, 50000L);
+        String idempotencyKey = UUID.randomUUID().toString();
+        Payment payment = new Payment(orderId, userId, idempotencyKey, 50000L, 50000L);
         payment.fail();
 
         // when & then

@@ -1,8 +1,15 @@
 package kr.hhplus.be.server.product;
 
+import kr.hhplus.be.server.TestContainerSupport;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,10 +18,19 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class ProductRepositoryTest {
+@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class ProductRepositoryTest extends TestContainerSupport {
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+    }
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductJpaRepository productRepository;
 
     @Test
     void shouldSaveAndFindProduct() {

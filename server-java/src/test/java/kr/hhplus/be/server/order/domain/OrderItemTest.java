@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.order.domain;
 
+import kr.hhplus.be.server.domain.order.OrderItem;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.product;
 
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.domain.product.ProductStatus;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

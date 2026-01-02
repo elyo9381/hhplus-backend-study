@@ -1,18 +1,19 @@
 package kr.hhplus.be.server.integration;
 
-import kr.hhplus.be.server.order.domain.Order;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequest;
-import kr.hhplus.be.server.order.application.OrderService;
-import kr.hhplus.be.server.payment.domain.Payment;
-import kr.hhplus.be.server.payment.application.PaymentService;
-import kr.hhplus.be.server.point.PointService;
-import kr.hhplus.be.server.product.ProductEntity;
-import kr.hhplus.be.server.product.ProductService;
+import kr.hhplus.be.server.TestContainerSupport;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
+import kr.hhplus.be.server.application.order.OrderService;
+import kr.hhplus.be.server.application.payment.PaymentService;
+import kr.hhplus.be.server.application.point.PointService;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.application.product.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,9 +32,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - ADR-016: 트랜잭션 원자성
  */
 @SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class ConcurrencyIntegrationTest {
+@ActiveProfiles("test")
+class ConcurrencyIntegrationTest extends TestContainerSupport {
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+    }
 
     @Autowired
     private OrderService orderService;
@@ -209,7 +216,7 @@ class ConcurrencyIntegrationTest {
         // 결제 시도 (실패 예상)
         AtomicInteger failCount = new AtomicInteger(0);
         try {
-            paymentService.executePayment(order.getId(), userId);
+            paymentService.executePayment(order.getId(), userId, UUID.randomUUID().toString());
         } catch (IllegalArgumentException e) {
             if (e.getMessage().equals("Insufficient point balance")) {
                 failCount.incrementAndGet();
@@ -244,12 +251,11 @@ class ConcurrencyIntegrationTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    paymentService.executePayment(order.getId(), userId);
+                    paymentService.executePayment(order.getId(), userId, UUID.randomUUID().toString());
                     successCount.incrementAndGet();
-                } catch (IllegalStateException e) {
-                    if (e.getMessage().equals("Payment already exists")) {
-                        failCount.incrementAndGet();
-                    }
+                } catch (Exception e) {
+                    // 중복 결제 또는 주문 상태 변경으로 인한 실패
+                    failCount.incrementAndGet();
                 } finally {
                     latch.countDown();
                 }
@@ -259,7 +265,7 @@ class ConcurrencyIntegrationTest {
         latch.await();
         executorService.shutdown();
 
-        // then: 1개만 성공, 나머지는 중복 실패
+        // then: 1개만 성공, 나머지는 실패
         assertThat(successCount.get()).isEqualTo(1);
         assertThat(failCount.get()).isEqualTo(4);
 

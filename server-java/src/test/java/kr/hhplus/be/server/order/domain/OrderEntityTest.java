@@ -1,7 +1,10 @@
 package kr.hhplus.be.server.order.domain;
 
-import kr.hhplus.be.server.order.infrastructure.persistence.OrderEntity;
-import kr.hhplus.be.server.order.infrastructure.persistence.OrderItemEntity;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderItem;
+import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.infrastructure.order.persistence.OrderEntity;
+import kr.hhplus.be.server.infrastructure.order.persistence.OrderItemEntity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

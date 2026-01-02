@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.point;
 
+import kr.hhplus.be.server.infrastructure.point.persistence.PointEntity;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

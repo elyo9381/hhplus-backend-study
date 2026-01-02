@@ -1,12 +1,15 @@
 package kr.hhplus.be.server.order.domain;
 
-import kr.hhplus.be.server.order.application.OrderService;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequest;
-import kr.hhplus.be.server.product.ProductSnapshot;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.hhplus.be.server.application.order.OrderService;
+import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
+import kr.hhplus.be.server.application.order.ProductPort;
+import kr.hhplus.be.server.domain.order.*;
+import kr.hhplus.be.server.domain.outbox.OutboxRepository;
+import kr.hhplus.be.server.domain.product.ProductSnapshot;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -27,8 +30,15 @@ class OrderServiceTest {
     @Mock
     private ProductPort productPort;
 
-    @InjectMocks
+    @Mock
+    private OutboxRepository outboxRepository;
+
     private OrderService orderService;
+
+    @BeforeEach
+    void setUp() {
+        orderService = new OrderService(orderRepository, productPort, outboxRepository, new ObjectMapper());
+    }
 
     @Test
     void shouldCreateOrderWithSingleProduct() {

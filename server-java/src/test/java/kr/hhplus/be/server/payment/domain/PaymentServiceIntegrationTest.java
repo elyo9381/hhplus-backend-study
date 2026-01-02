@@ -1,19 +1,21 @@
 package kr.hhplus.be.server.payment.domain;
 
-import kr.hhplus.be.server.order.domain.Order;
-import kr.hhplus.be.server.order.domain.OrderItem;
-import kr.hhplus.be.server.order.domain.OrderRepository;
-import kr.hhplus.be.server.order.domain.OrderStatus;
-import kr.hhplus.be.server.order.application.OrderService;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequest;
-import kr.hhplus.be.server.payment.application.PaymentService;
-import kr.hhplus.be.server.point.PointService;
-import kr.hhplus.be.server.product.ProductEntity;
-import kr.hhplus.be.server.product.ProductService;
+import kr.hhplus.be.server.AbstractIntegrationTest;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.domain.order.OrderStatus;
+import kr.hhplus.be.server.application.order.OrderService;
+import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
+import kr.hhplus.be.server.application.payment.PaymentService;
+import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
+import kr.hhplus.be.server.application.point.PointService;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.application.product.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,8 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
-class PaymentServiceIntegrationTest {
+class PaymentServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private PaymentService paymentService;
@@ -59,17 +60,19 @@ class PaymentServiceIntegrationTest {
         // given: 상품 생성 및 포인트 충전
         ProductEntity product = productService.createProduct("Product A", "Description", BigDecimal.valueOf(10000), 10);
         pointService.chargePoint(userId, 50000L);
+        String idempotencyKey = UUID.randomUUID().toString();
 
         // when: 주문 생성
         OrderItemRequest itemRequest = new OrderItemRequest(product.getId(), 2);
         Order order = orderService.createOrder(userId, List.of(itemRequest));
 
         // 결제 실행
-        Payment payment = paymentService.executePayment(order.getId(), userId);
+        Payment payment = paymentService.executePayment(order.getId(), userId, idempotencyKey);
 
         // then: 결제 성공, 주문 상태 변경
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.SUCCESS);
         assertThat(payment.getAmount()).isEqualTo(20000L);
+        assertThat(payment.getIdempotencyKey()).isEqualTo(idempotencyKey);
 
         Order updatedOrder = orderRepository.findById(order.getId()).orElseThrow();
         assertThat(updatedOrder.getStatus()).isEqualTo(OrderStatus.PAID);
@@ -79,17 +82,42 @@ class PaymentServiceIntegrationTest {
     }
 
     @Test
+    void shouldReturnSamePaymentForDuplicateIdempotencyKey() {
+        // given: 상품 생성 및 포인트 충전
+        ProductEntity product = productService.createProduct("Product A", "Description", BigDecimal.valueOf(10000), 10);
+        pointService.chargePoint(userId, 50000L);
+        String idempotencyKey = UUID.randomUUID().toString();
+
+        // when: 주문 생성 및 첫 번째 결제
+        OrderItemRequest itemRequest = new OrderItemRequest(product.getId(), 2);
+        Order order = orderService.createOrder(userId, List.of(itemRequest));
+        Payment firstPayment = paymentService.executePayment(order.getId(), userId, idempotencyKey);
+
+        // 같은 idempotencyKey로 재요청
+        Payment secondPayment = paymentService.executePayment(order.getId(), userId, idempotencyKey);
+
+        // then: 같은 결제 결과 반환
+        assertThat(secondPayment.getId()).isEqualTo(firstPayment.getId());
+        assertThat(secondPayment.getIdempotencyKey()).isEqualTo(idempotencyKey);
+
+        // 포인트는 1번만 차감
+        Long remainingPoints = pointService.getAvailablePoints(userId);
+        assertThat(remainingPoints).isEqualTo(30000L);
+    }
+
+    @Test
     void shouldRollbackWhenInsufficientPoints() {
         // given: 상품 생성, 포인트 부족
         ProductEntity product = productService.createProduct("Product A", "Description", BigDecimal.valueOf(10000), 10);
         pointService.chargePoint(userId, 5000L); // 부족한 포인트
+        String idempotencyKey = UUID.randomUUID().toString();
 
         // when: 주문 생성
         OrderItemRequest itemRequest = new OrderItemRequest(product.getId(), 2);
         Order order = orderService.createOrder(userId, List.of(itemRequest));
 
         // then: 결제 실패 (포인트 부족)
-        assertThatThrownBy(() -> paymentService.executePayment(order.getId(), userId))
+        assertThatThrownBy(() -> paymentService.executePayment(order.getId(), userId, idempotencyKey))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Insufficient point balance");
 
@@ -103,7 +131,7 @@ class PaymentServiceIntegrationTest {
     }
 
     @Test
-    void shouldPreventDuplicatePayment() throws InterruptedException {
+    void shouldPreventDuplicatePaymentForSameOrder() throws InterruptedException {
         // given: 상품 생성, 포인트 충전, 주문 생성
         ProductEntity product = productService.createProduct("Product A", "Description", BigDecimal.valueOf(10000), 10);
         pointService.chargePoint(userId, 100000L);
@@ -117,16 +145,16 @@ class PaymentServiceIntegrationTest {
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger failCount = new AtomicInteger(0);
 
-        // when: 동시에 같은 주문에 대해 결제 시도
+        // when: 동시에 같은 주문에 대해 다른 idempotencyKey로 결제 시도
         for (int i = 0; i < threadCount; i++) {
+            String idempotencyKey = UUID.randomUUID().toString();
             executorService.submit(() -> {
                 try {
-                    paymentService.executePayment(order.getId(), userId);
+                    paymentService.executePayment(order.getId(), userId, idempotencyKey);
                     successCount.incrementAndGet();
-                } catch (IllegalStateException e) {
-                    if (e.getMessage().equals("Payment already exists")) {
-                        failCount.incrementAndGet();
-                    }
+                } catch (Exception e) {
+                    // 중복 결제 또는 주문 상태 변경으로 인한 실패
+                    failCount.incrementAndGet();
                 } finally {
                     latch.countDown();
                 }
@@ -146,18 +174,20 @@ class PaymentServiceIntegrationTest {
     }
 
     @Test
-    void shouldFailWhenOrderNotPending() {
+    void shouldFailWhenOrderAlreadyPaid() {
         // given: 상품 생성, 포인트 충전, 주문 생성 및 결제 완료
         ProductEntity product = productService.createProduct("Product A", "Description", BigDecimal.valueOf(10000), 10);
         pointService.chargePoint(userId, 100000L);
 
         OrderItemRequest itemRequest = new OrderItemRequest(product.getId(), 2);
         Order order = orderService.createOrder(userId, List.of(itemRequest));
-        paymentService.executePayment(order.getId(), userId);
+        String firstKey = UUID.randomUUID().toString();
+        paymentService.executePayment(order.getId(), userId, firstKey);
 
-        // when & then: 이미 결제된 주문에 대해 재결제 시도
-        assertThatThrownBy(() -> paymentService.executePayment(order.getId(), userId))
+        // when & then: 다른 idempotencyKey로 재결제 시도
+        String secondKey = UUID.randomUUID().toString();
+        assertThatThrownBy(() -> paymentService.executePayment(order.getId(), userId, secondKey))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Payment already exists");
+                .hasMessage("Payment already exists for this order");
     }
 }

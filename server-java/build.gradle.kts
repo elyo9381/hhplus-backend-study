@@ -34,6 +34,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-webflux") // WebClient
 
     // Lombok
 	compileOnly("org.projectlombok:lombok")
@@ -44,14 +45,51 @@ dependencies {
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-	// testImplementation("org.springframework.boot:spring-boot-testcontainers")
-	// testImplementation("org.testcontainers:junit-jupiter")
-	// testImplementation("org.testcontainers:mysql")
-	testRuntimeOnly("com.h2database:h2")
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("org.testcontainers:mysql")
+	testImplementation("com.h2database:h2")  // 단위 테스트용
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
 	systemProperty("user.timezone", "UTC")
+	
+	// 테스트 순차 실행
+	maxParallelForks = 1
+	
+	// JVM 메모리 설정
+	jvmArgs("-Xmx1024m")
+}
+
+// 단위 테스트만 실행 (빠름, Mock 기반)
+tasks.register<Test>("unitTest") {
+	useJUnitPlatform()
+	systemProperty("user.timezone", "UTC")
+	
+	// DB 필요한 테스트 제외
+	exclude("**/integration/**")
+	exclude("**/outbox/**")
+	exclude("**/*IntegrationTest*")
+	exclude("**/*ConcurrencyTest*")
+	exclude("**/*RepositoryTest*")
+	exclude("**/*LockTest*")
+	exclude("**/SimpleSpringBootTest*")
+	exclude("**/ServerApplicationTests*")
+}
+
+// 통합 테스트만 실행 (Testcontainers 사용)
+tasks.register<Test>("integrationTest") {
+	useJUnitPlatform()
+	systemProperty("user.timezone", "UTC")
+	
+	// DB 필요한 테스트 포함
+	include("**/integration/**")
+	include("**/outbox/**")
+	include("**/*IntegrationTest*")
+	include("**/*ConcurrencyTest*")
+	include("**/*RepositoryTest*")
+	include("**/SimpleSpringBootTest*")
+	include("**/ServerApplicationTests*")
 }

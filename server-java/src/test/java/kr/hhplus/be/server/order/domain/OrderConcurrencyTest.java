@@ -1,11 +1,14 @@
 package kr.hhplus.be.server.order.domain;
 
-import kr.hhplus.be.server.product.ProductEntity;
-import kr.hhplus.be.server.product.ProductRepository;
+import kr.hhplus.be.server.TestContainerSupport;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -26,11 +29,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - ADR-021: productId 정렬로 데드락 방지
  */
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class OrderConcurrencyTest {
+@ActiveProfiles("test")
+class OrderConcurrencyTest extends TestContainerSupport {
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+    }
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductJpaRepository productRepository;
 
     @Autowired
     private PlatformTransactionManager transactionManager;

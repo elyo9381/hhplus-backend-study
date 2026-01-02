@@ -1,14 +1,20 @@
 package kr.hhplus.be.server.order.domain;
 
-import kr.hhplus.be.server.order.application.OrderService;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequest;
-import kr.hhplus.be.server.product.ProductEntity;
-import kr.hhplus.be.server.product.ProductRepository;
-import kr.hhplus.be.server.product.ProductService;
+import kr.hhplus.be.server.TestContainerSupport;
+import kr.hhplus.be.server.application.order.OrderService;
+import kr.hhplus.be.server.application.order.dto.OrderItemRequest;
+import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderRepository;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
+import kr.hhplus.be.server.infrastructure.product.persistence.ProductJpaRepository;
+import kr.hhplus.be.server.application.product.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,7 +27,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-class OrderServiceIntegrationTest {
+@ActiveProfiles("test")
+class OrderServiceIntegrationTest extends TestContainerSupport {
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
+        registry.add("spring.datasource.username", TestContainerSupport::getUsername);
+        registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+    }
 
     @Autowired
     private OrderService orderService;
@@ -30,7 +44,7 @@ class OrderServiceIntegrationTest {
     private ProductService productService;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductJpaRepository productRepository;
 
     @Autowired
     private OrderRepository orderRepository;
