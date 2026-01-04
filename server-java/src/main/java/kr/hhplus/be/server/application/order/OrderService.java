@@ -35,14 +35,22 @@ public class OrderService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * 주문 생성
+     * 
+     * 동시성 제어:
+     * - 비관적 락: ProductPort.decreaseStockWithSnapshot() 내부에서 FOR UPDATE
+     * - 데드락 방지: productId 정렬로 락 획득 순서 일관성 보장 (ADR-021)
+     * - 트랜잭션: 재고 차감 + 주문 저장 + Outbox 저장 원자성 보장
+     */
     @Transactional
     public Order createOrder(UUID userId, List<OrderItemRequest> itemRequests) {
-        // 데드락 방지: productId 순으로 정렬
+        // 데드락 방지: productId 순으로 정렬 (ADR-021)
         List<OrderItemRequest> sortedRequests = itemRequests.stream()
                 .sorted(Comparator.comparing(OrderItemRequest::productId))
                 .toList();
 
-        // 재고 차감 + 스냅샷 획득
+        // 재고 차감 + 스냅샷 획득 (비관적 락 적용)
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemRequest request : sortedRequests) {
             ProductSnapshot snapshot = productPort.decreaseStockWithSnapshot(
