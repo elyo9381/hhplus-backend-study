@@ -49,14 +49,22 @@ public class PointService implements PointPort {
                 .sum();
     }
 
+    /**
+     * 포인트 사용
+     * 
+     * 동시성 제어:
+     * - 비관적 락: findByUserIdAndExpiredAtAfterOrderByExpiredAtAsc()에서 FOR UPDATE
+     * - 잔액 검증: 락 획득 후 잔액 확인 → 음수 방지
+     * - FIFO 차감: 만료일 순 정렬로 먼저 만료되는 포인트부터 사용
+     */
     @Override
     @Transactional
     public void usePoint(UUID userId, Long amount) {
-        // 1. 만료되지 않은 포인트 조회 (락)
+        // 1. 만료되지 않은 포인트 조회 (비관적 락 - FOR UPDATE)
         LocalDateTime now = LocalDateTime.now();
         var points = pointRepository.findByUserIdAndExpiredAtAfterOrderByExpiredAtAsc(userId, now);
         
-        // 2. 잔액 확인
+        // 2. 잔액 확인 (락 획득 후 검증)
         Long totalBalance = points.stream()
                 .mapToLong(PointEntity::getAmount)
                 .sum();

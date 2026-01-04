@@ -6,6 +6,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        connection:
+          isolation: 2  # READ_COMMITTED
 logging:
   level:
     org.hibernate.SQL: DEBUG

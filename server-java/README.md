@@ -7,6 +7,7 @@
 - [시퀀스 다이어그램](./docs/sequence/README.md) - 비즈니스 플로우 및 API 흐름
 - [API 명세](./docs/api-spec/openai.yaml) - OpenAPI 스펙
 - [인프라 구성](./docs/infra/infrastructure.md) - 인프라 아키텍처 및 배포 전략
+- [동시성 제어](./docs/concurrency/CONCURRENCY.md) - 동시성 이슈 및 해결 전략
 
 ## 아키텍처 
 
