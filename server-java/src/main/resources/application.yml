@@ -12,6 +12,8 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
+        connection:
+          isolation: 2  # READ_COMMITTED (1=RU, 2=RC, 4=RR, 8=SR)
 
 logging:
   level:
