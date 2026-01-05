@@ -70,6 +70,15 @@ public class ProductEntity {
         updateStatus();
     }
 
+    // 레이어드 아키텍처용 비즈니스 로직
+    public void increseStock(int quantity) {
+        if ( quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
+        this.stock += quantity;
+        updateStatus();
+    }
+
     private void updateStatus() {
         this.status = this.stock > 0 ? ProductStatus.SELLING : ProductStatus.SOLDOUT;
         this.updatedAt = LocalDateTime.now();

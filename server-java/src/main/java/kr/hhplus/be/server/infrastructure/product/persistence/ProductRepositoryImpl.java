@@ -4,6 +4,7 @@ import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,11 +19,13 @@ import java.util.UUID;
  */
 @Repository
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductRepositoryImpl implements ProductRepository {
 
     private final ProductJpaRepository jpaRepository;
 
     @Override
+    @Transactional
     public Product save(Product product) {
         ProductEntity entity = ProductEntity.from(product);
         ProductEntity saved = jpaRepository.save(entity);
