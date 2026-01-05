@@ -11,6 +11,33 @@ services:
       - MYSQL_DATABASE=hhplus
     volumes:
       - ./data/mysql/:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hhplus
+      - SPRING_DATASOURCE_USERNAME=application
+      - SPRING_DATASOURCE_PASSWORD=application
+      - SPRING_DATA_REDIS_HOST=redis
+      - EXTERNAL_API_URL=http://app:8080/mock/external
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
 networks:
   default:
