@@ -1,9 +1,12 @@
 package kr.hhplus.be.server.application.product;
 
+import io.lettuce.core.ClientOptions;
+import io.lettuce.core.RedisClient;
 import kr.hhplus.be.server.application.order.ProductPort;
 import kr.hhplus.be.server.domain.product.ProductSnapshot;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductJpaRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +52,15 @@ public class ProductService implements ProductPort {
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
         
         product.decreaseStock(quantity);
+        productRepository.save(product);
+    }
+
+    @Transactional
+    public void increseStock(UUID productId, int quantity) {
+        ProductEntity product = productRepository.findByIdWithLock(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        product.increseStock(quantity);
         productRepository.save(product);
     }
 
