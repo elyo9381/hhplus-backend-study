@@ -37,6 +37,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux") // WebClient
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
+    // Redisson
+    implementation("org.redisson:redisson-spring-boot-starter:3.24.3")
+
     // Lombok
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")

@@ -2,12 +2,15 @@ package kr.hhplus.be.server.application.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.OrderItem;
 import kr.hhplus.be.server.domain.order.OrderRepository;
 import kr.hhplus.be.server.domain.order.OrderStatus;
 import kr.hhplus.be.server.domain.outbox.Outbox;
 import kr.hhplus.be.server.domain.outbox.OutboxRepository;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
+import kr.hhplus.be.server.infrastructure.product.ProductRankingRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class PaymentService {
 
@@ -23,17 +27,20 @@ public class PaymentService {
     private final PointPort pointPort;
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
+    private final ProductRankingRepository productRankingRepository;
 
     public PaymentService(PaymentRepository paymentRepository,
                           OrderRepository orderRepository,
                           PointPort pointPort,
                           OutboxRepository outboxRepository,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper,
+                          ProductRankingRepository productRankingRepository) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.pointPort = pointPort;
         this.outboxRepository = outboxRepository;
         this.objectMapper = objectMapper;
+        this.productRankingRepository = productRankingRepository;
     }
 
     @Transactional
@@ -91,7 +98,25 @@ public class PaymentService {
         );
         outboxRepository.save(outbox);
 
+        // 10. 인기 상품 랭킹 업데이트 (결제 완료 시점)
+        updateProductRanking(order);
+
         return savedPayment;
+    }
+
+    /**
+     * 인기 상품 랭킹 업데이트
+     * - 결제 완료된 주문의 상품별 주문 수량을 Redis에 반영
+     */
+    private void updateProductRanking(Order order) {
+        try {
+            for (OrderItem item : order.getItems()) {
+                productRankingRepository.incrementScore(item.getProductId(), item.getQuantity());
+            }
+        } catch (Exception e) {
+            // 랭킹 업데이트 실패해도 결제는 성공 처리 (비핵심 기능)
+            log.warn("Failed to update product ranking for order: {}", order.getId(), e);
+        }
     }
 
     private String toJson(Object obj) {
