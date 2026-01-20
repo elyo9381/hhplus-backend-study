@@ -25,15 +25,29 @@ public class CouponService {
 
     /**
      * 쿠폰 생성
+     * - DB와 Redis 동시 초기화 (정합성 보장)
+     * - Redis 초기화 실패 시 트랜잭션 롤백
      */
     @Transactional
     public Coupon createCoupon(String name, Long discountAmount, int totalQuantity,
                                LocalDateTime startAt, LocalDateTime endAt) {
+        // 1. DB 저장
         Coupon coupon = new Coupon(name, discountAmount, totalQuantity, startAt, endAt);
         Coupon saved = couponRepository.save(coupon);
         
-        // Redis 초기화 (쿠폰 정보 전체 캐싱)
-        couponRedisRepository.initCoupon(saved.getId(), totalQuantity, startAt, endAt);
+        // 2. Redis 초기화 (DB와 동일한 값)
+        //    실패 시 RuntimeException → 트랜잭션 롤백
+        try {
+            couponRedisRepository.initCoupon(
+                    saved.getId(),
+                    totalQuantity,
+                    startAt,
+                    endAt
+            );
+        } catch (Exception e) {
+            log.error("Redis 초기화 실패 - couponId: {}", saved.getId(), e);
+            throw new RuntimeException("쿠폰 생성 실패: Redis 초기화 오류", e);
+        }
         
         return saved;
     }
