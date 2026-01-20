@@ -32,55 +32,48 @@ public class CouponService {
         Coupon coupon = new Coupon(name, discountAmount, totalQuantity, startAt, endAt);
         Coupon saved = couponRepository.save(coupon);
         
-        // Redis 초기화 (수량 캐싱 포함)
-        couponRedisRepository.initCoupon(saved.getId(), totalQuantity, endAt);
+        // Redis 초기화 (쿠폰 정보 전체 캐싱)
+        couponRedisRepository.initCoupon(saved.getId(), totalQuantity, startAt, endAt);
         
         return saved;
     }
 
     /**
-     * 선착순 쿠폰 발급 (Redis 분산락 기반)
+     * 선착순 쿠폰 발급 (Redis Only - DB 조회 없음)
      * 
      * 동시성 제어:
-     * 1. Redis 분산락으로 원자적 발급 (중복 + 수량 체크)
-     * 2. 트랜잭션 롤백 시 Redis 자동 롤백 (TransactionSynchronization)
-     * 3. DB 저장 (UserCoupon + Coupon remainingQuantity)
-     * 
-     * Source of Truth: Redis (수량 체크)
-     * DB: 영속화 + 조회용
+     * 1. Redis에서 쿠폰 정보 조회 (DB 조회 X)
+     * 2. Redis 분산락으로 원자적 발급 (중복 + 수량 + 기간 체크)
+     * 3. 트랜잭션 롤백 시 Redis 자동 롤백
+     * 4. DB 저장 (UserCoupon + Coupon remainingQuantity)
      */
     @Transactional
     public UserCoupon issueCoupon(UUID couponId, UUID userId) {
-        // 1. 쿠폰 정보 조회
-        Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다"));
-
-        // 2. 발급 기간 검증
-        coupon.validateIssuable();
-
-        // 3. Redis 분산락 기반 발급 시도
-        boolean issued = couponRedisRepository.tryIssue(couponId, userId, coupon.getTotalQuantity());
+        // 1. Redis 분산락 기반 발급 (DB 조회 없이 Redis만 사용)
+        boolean issued = couponRedisRepository.tryIssue(couponId, userId);
         if (!issued) {
             throw new IllegalStateException("이미 발급받은 쿠폰입니다");
         }
 
-        // 4. 트랜잭션 롤백 시 Redis 자동 롤백 등록
+        // 2. 트랜잭션 롤백 시 Redis 자동 롤백 등록
         registerRedisRollback(couponId, userId);
 
+        // 3. DB 저장 (쿠폰 정보는 여기서 조회 - 저장용)
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다"));
+
         try {
-            // 5. DB 저장 - UserCoupon
+            // 4. DB 저장 - UserCoupon
             UserCoupon userCoupon = new UserCoupon(userId, coupon);
             UserCoupon saved = userCouponRepository.save(userCoupon);
             
-            // 6. DB 동기화 - Coupon remainingQuantity 차감
+            // 5. DB 동기화 - Coupon remainingQuantity 차감
             coupon.issue();
             couponRepository.save(coupon);
             
             return saved;
             
         } catch (DataIntegrityViolationException e) {
-            // UNIQUE 제약 위반 - 이미 발급됨
-            // TransactionSynchronization이 롤백 처리하므로 여기서는 예외만 던짐
             throw new IllegalStateException("이미 발급받은 쿠폰입니다");
         }
     }
