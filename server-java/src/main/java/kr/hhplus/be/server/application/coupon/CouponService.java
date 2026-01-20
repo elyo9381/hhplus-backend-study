@@ -41,12 +41,12 @@ public class CouponService {
      * 
      * 동시성 제어:
      * 1. Redis 분산락으로 원자적 발급 (중복 + 수량 체크)
-     * 2. DB 저장 (UNIQUE 제약으로 최종 방어)
+     * 2. DB 저장 (UserCoupon + Coupon remainingQuantity 동기화)
      * 3. 실패 시 Redis 롤백
      */
     @Transactional
     public UserCoupon issueCoupon(UUID couponId, UUID userId) {
-        // 1. 쿠폰 정보 조회 (수량 확인용)
+        // 1. 쿠폰 정보 조회
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다"));
 
@@ -60,16 +60,20 @@ public class CouponService {
         }
 
         try {
-            // 4. DB 저장
+            // 4. DB 저장 - UserCoupon
             UserCoupon userCoupon = new UserCoupon(userId, coupon);
-            return userCouponRepository.save(userCoupon);
+            UserCoupon saved = userCouponRepository.save(userCoupon);
+            
+            // 5. DB 동기화 - Coupon remainingQuantity 차감
+            coupon.issue();
+            couponRepository.save(coupon);
+            
+            return saved;
             
         } catch (DataIntegrityViolationException e) {
-            // 5. DB 저장 실패 시 Redis 롤백
             couponRedisRepository.rollback(couponId, userId);
             throw new IllegalStateException("이미 발급받은 쿠폰입니다");
         } catch (Exception e) {
-            // 6. 기타 예외 시 Redis 롤백
             couponRedisRepository.rollback(couponId, userId);
             throw e;
         }
