@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,8 +43,11 @@ public class CouponService {
      * 
      * 동시성 제어:
      * 1. Redis 분산락으로 원자적 발급 (중복 + 수량 체크)
-     * 2. DB 저장 (UserCoupon + Coupon remainingQuantity 동기화)
-     * 3. 실패 시 Redis 롤백
+     * 2. 트랜잭션 롤백 시 Redis 자동 롤백 (TransactionSynchronization)
+     * 3. DB 저장 (UserCoupon + Coupon remainingQuantity)
+     * 
+     * Source of Truth: Redis (수량 체크)
+     * DB: 영속화 + 조회용
      */
     @Transactional
     public UserCoupon issueCoupon(UUID couponId, UUID userId) {
@@ -59,24 +64,47 @@ public class CouponService {
             throw new IllegalStateException("이미 발급받은 쿠폰입니다");
         }
 
+        // 4. 트랜잭션 롤백 시 Redis 자동 롤백 등록
+        registerRedisRollback(couponId, userId);
+
         try {
-            // 4. DB 저장 - UserCoupon
+            // 5. DB 저장 - UserCoupon
             UserCoupon userCoupon = new UserCoupon(userId, coupon);
             UserCoupon saved = userCouponRepository.save(userCoupon);
             
-            // 5. DB 동기화 - Coupon remainingQuantity 차감
+            // 6. DB 동기화 - Coupon remainingQuantity 차감
             coupon.issue();
             couponRepository.save(coupon);
             
             return saved;
             
         } catch (DataIntegrityViolationException e) {
-            couponRedisRepository.rollback(couponId, userId);
+            // UNIQUE 제약 위반 - 이미 발급됨
+            // TransactionSynchronization이 롤백 처리하므로 여기서는 예외만 던짐
             throw new IllegalStateException("이미 발급받은 쿠폰입니다");
-        } catch (Exception e) {
-            couponRedisRepository.rollback(couponId, userId);
-            throw e;
         }
+    }
+
+    /**
+     * 트랜잭션 롤백 시 Redis 롤백 등록
+     * - 트랜잭션이 어떤 이유로든 롤백되면 Redis도 롤백
+     * - 커밋 성공 시에는 아무것도 안함
+     */
+    private void registerRedisRollback(UUID couponId, UUID userId) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status == STATUS_ROLLED_BACK) {
+                    try {
+                        couponRedisRepository.rollback(couponId, userId);
+                        log.info("트랜잭션 롤백으로 Redis 롤백 완료 - couponId: {}, userId: {}", couponId, userId);
+                    } catch (Exception e) {
+                        // Redis 롤백 실패 시 로그만 남김 (배치로 정합성 체크 필요)
+                        log.error("Redis 롤백 실패 - couponId: {}, userId: {}", couponId, userId, e);
+                    }
+                }
+            }
+        });
     }
 
     /**
