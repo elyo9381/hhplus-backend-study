@@ -30,8 +30,8 @@ public class CouponService {
         Coupon coupon = new Coupon(name, discountAmount, totalQuantity, startAt, endAt);
         Coupon saved = couponRepository.save(coupon);
         
-        // Redis 초기화
-        couponRedisRepository.initCoupon(saved.getId(), endAt);
+        // Redis 초기화 (수량 캐싱 포함)
+        couponRedisRepository.initCoupon(saved.getId(), totalQuantity, endAt);
         
         return saved;
     }
