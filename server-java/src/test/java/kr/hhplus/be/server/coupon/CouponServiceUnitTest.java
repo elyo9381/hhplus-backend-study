@@ -149,6 +149,6 @@ class CouponServiceUnitTest {
         couponService.createCoupon("새 쿠폰", 1000L, 50, LocalDateTime.now(), endAt);
 
         // then
-        verify(couponRedisRepository).initCoupon(any(UUID.class), eq(endAt));
+        verify(couponRedisRepository).initCoupon(any(UUID.class), eq(50), eq(endAt));
     }
 }
