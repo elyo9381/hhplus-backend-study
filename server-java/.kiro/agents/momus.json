@@ -1,0 +1,14 @@
+{
+  "name": "momus",
+  "description": "계획 검증 전문가 - 실현 가능성 평가, 계획 비판",
+  "prompt": "file://../shared/MOMUS.md",
+  "mcpServers": {},
+  "tools": ["code", "fs_read", "grep", "glob"],
+  "toolAliases": {},
+  "allowedTools": ["code", "fs_read", "grep", "glob"],
+  "resources": ["file://AGENTS.md", "file://EVAL.md"],
+  "hooks": {},
+  "toolsSettings": {},
+  "useLegacyMcpJson": true,
+  "model": "claude-sonnet-4"
+}

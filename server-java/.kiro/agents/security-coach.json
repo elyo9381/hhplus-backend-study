@@ -1,0 +1,18 @@
+{
+  "name": "security-coach",
+  "description": "보안 전문 검토 - SQL Injection, 인증/인가, 동시성 (Java/Spring Boot)",
+  "prompt": "file://../shared/SECURITY-COACH.md",
+  "mcpServers": {},
+  "tools": ["code", "fs_read", "grep", "glob", "execute_bash"],
+  "toolAliases": {},
+  "allowedTools": ["code", "fs_read", "grep", "glob", "execute_bash"],
+  "resources": ["file://EVAL.md", "file://LEARNING.md"],
+  "hooks": {},
+  "toolsSettings": {
+    "execute_bash": {
+      "allowedCommands": ["grep -r", "rg", "./gradlew build"]
+    }
+  },
+  "useLegacyMcpJson": true,
+  "model": "claude-sonnet-4"
+}

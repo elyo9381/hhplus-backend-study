@@ -9,12 +9,14 @@ import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.application.payment.PointPort;
+import kr.hhplus.be.server.infrastructure.product.ProductRankingRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +42,12 @@ class PaymentServiceTest {
     @Mock
     private OutboxRepository outboxRepository;
 
+    @Mock
+    private ProductRankingRepository productRankingRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private PaymentService paymentService;
 
     @BeforeEach
@@ -49,7 +57,9 @@ class PaymentServiceTest {
                 orderRepository, 
                 pointPort, 
                 outboxRepository,
-                new ObjectMapper()
+                new ObjectMapper(),
+                productRankingRepository,
+                eventPublisher
         );
     }
 

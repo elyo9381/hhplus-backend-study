@@ -1,0 +1,14 @@
+{
+  "name": "librarian",
+  "description": "문서 검색 전문가 - 코드베이스 분석, OSS 예제 찾기",
+  "prompt": "file://../shared/LIBRARIAN.md",
+  "mcpServers": {},
+  "tools": ["code", "fs_read", "grep", "glob", "web_search", "web_fetch"],
+  "toolAliases": {},
+  "allowedTools": ["code", "fs_read", "grep", "glob", "web_search", "web_fetch"],
+  "resources": ["file://AGENTS.md"],
+  "hooks": {},
+  "toolsSettings": {},
+  "useLegacyMcpJson": true,
+  "model": "claude-haiku"
+}
