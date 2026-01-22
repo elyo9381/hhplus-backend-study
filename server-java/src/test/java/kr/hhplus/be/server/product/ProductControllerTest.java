@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.product;
 
 import kr.hhplus.be.server.application.product.ProductService;
+import kr.hhplus.be.server.infrastructure.product.ProductRankingRepository;
 import kr.hhplus.be.server.infrastructure.product.persistence.ProductEntity;
 import kr.hhplus.be.server.presentation.product.ProductController;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class ProductControllerTest {
 
     @MockitoBean
     private ProductService productService;
+
+    @MockitoBean
+    private ProductRankingRepository productRankingRepository;
 
     @Test
     void shouldGetProduct() throws Exception {

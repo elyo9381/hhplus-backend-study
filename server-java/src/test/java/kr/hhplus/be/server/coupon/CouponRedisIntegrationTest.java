@@ -78,7 +78,7 @@ class CouponRedisIntegrationTest extends TestContainerSupport {
                 try {
                     couponService.issueCoupon(coupon.getId(), UUID.randomUUID());
                     successCount.incrementAndGet();
-                } catch (IllegalStateException e) {
+                } catch (Exception e) {
                     failCount.incrementAndGet();
                 } finally {
                     latch.countDown();

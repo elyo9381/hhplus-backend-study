@@ -44,12 +44,18 @@ class ProductRankingIntegrationTest extends TestContainerSupport {
     @Autowired
     private ProductRankingRepository productRankingRepository;
 
+    @Autowired
+    private org.redisson.api.RedissonClient redissonClient;
+
     private UUID productA;
     private UUID productB;
     private UUID productC;
 
     @BeforeEach
     void setUp() {
+        // Redis 데이터 초기화
+        redissonClient.getKeys().flushdb();
+        
         productA = UUID.randomUUID();
         productB = UUID.randomUUID();
         productC = UUID.randomUUID();
