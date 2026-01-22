@@ -1,0 +1,14 @@
+{
+  "name": "explorer",
+  "description": "빠른 코드 탐색 전문가 - grep, 파일 구조 분석",
+  "prompt": "file://../shared/EXPLORER.md",
+  "mcpServers": {},
+  "tools": ["code", "fs_read", "grep", "glob"],
+  "toolAliases": {},
+  "allowedTools": ["code", "fs_read", "grep", "glob"],
+  "resources": [],
+  "hooks": {},
+  "toolsSettings": {},
+  "useLegacyMcpJson": true,
+  "model": "claude-haiku"
+}

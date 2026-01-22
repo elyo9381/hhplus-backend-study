@@ -1,0 +1,14 @@
+{
+  "name": "prometheus",
+  "description": "계획 수립 전문가 - 인터뷰 모드로 요구사항 정제, 전략적 계획",
+  "prompt": "file://../shared/PROMETHEUS.md",
+  "mcpServers": {},
+  "tools": ["code", "fs_read", "grep", "glob"],
+  "toolAliases": {},
+  "allowedTools": ["code", "fs_read", "grep", "glob"],
+  "resources": ["file://AGENTS.md", "file://EVAL.md"],
+  "hooks": {},
+  "toolsSettings": {},
+  "useLegacyMcpJson": true,
+  "model": "claude-opus-4.5"
+}

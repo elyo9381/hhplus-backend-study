@@ -1,0 +1,14 @@
+{
+  "name": "metis",
+  "description": "사전 분석 전문가 - 계획 전 갭 분석, 리스크 식별",
+  "prompt": "file://../shared/METIS.md",
+  "mcpServers": {},
+  "tools": ["code", "fs_read", "grep", "glob"],
+  "toolAliases": {},
+  "allowedTools": ["code", "fs_read", "grep", "glob"],
+  "resources": ["file://AGENTS.md", "file://LEARNING.md"],
+  "hooks": {},
+  "toolsSettings": {},
+  "useLegacyMcpJson": true,
+  "model": "claude-sonnet-4"
+}

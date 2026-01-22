@@ -2,6 +2,7 @@ package kr.hhplus.be.server.coupon;
 
 import kr.hhplus.be.server.application.coupon.CouponService;
 import kr.hhplus.be.server.domain.coupon.*;
+import kr.hhplus.be.server.infrastructure.coupon.CouponRedisRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,11 +27,14 @@ class CouponServiceTest {
     @Mock
     private UserCouponRepository userCouponRepository;
 
+    @Mock
+    private CouponRedisRepository couponRedisRepository;
+
     private CouponService couponService;
 
     @BeforeEach
     void setUp() {
-        couponService = new CouponService(couponRepository, userCouponRepository);
+        couponService = new CouponService(couponRepository, userCouponRepository, couponRedisRepository);
     }
 
     @Test

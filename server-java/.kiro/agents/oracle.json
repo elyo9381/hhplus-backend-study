@@ -1,0 +1,14 @@
+{
+  "name": "oracle",
+  "description": "읽기 전용 컨설턴트 - 디버깅 조언, 아키텍처 상담 (Java/Spring Boot)",
+  "prompt": "file://../shared/ORACLE.md",
+  "mcpServers": {},
+  "tools": ["code", "fs_read", "grep", "glob"],
+  "toolAliases": {},
+  "allowedTools": ["code", "fs_read", "grep", "glob"],
+  "resources": ["file://AGENTS.md", "file://LEARNING.md"],
+  "hooks": {},
+  "toolsSettings": {},
+  "useLegacyMcpJson": true,
+  "model": "claude-sonnet-4"
+}

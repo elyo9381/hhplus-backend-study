@@ -1,0 +1,18 @@
+{
+  "name": "perf-coach",
+  "description": "성능 전문 검토 - N+1 쿼리, 락 경합, 캐시 (Java/Spring Boot)",
+  "prompt": "file://../shared/PERF-COACH.md",
+  "mcpServers": {},
+  "tools": ["code", "fs_read", "grep", "glob", "execute_bash"],
+  "toolAliases": {},
+  "allowedTools": ["code", "fs_read", "grep", "glob", "execute_bash"],
+  "resources": ["file://EVAL.md", "file://LEARNING.md"],
+  "hooks": {},
+  "toolsSettings": {
+    "execute_bash": {
+      "allowedCommands": ["./gradlew test", "./gradlew build"]
+    }
+  },
+  "useLegacyMcpJson": true,
+  "model": "claude-sonnet-4"
+}
