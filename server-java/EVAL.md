@@ -26,6 +26,14 @@
 - [ ] 네이밍: camelCase, 의미 있는 이름
 - [ ] Lombok: `@Getter`, `@RequiredArgsConstructor` 활용
 
+### Comment Checker (AI 코드 품질)
+
+AI 생성 코드가 사람 코드와 구분 불가해야 함:
+- [ ] 불필요한 주석 없음 (코드로 설명 가능한 내용은 주석 금지)
+- [ ] TODO/FIXME 외 임시 주석 없음
+- [ ] 과도한 설명 주석 금지 ("// 사용자 ID를 가져온다" 같은 자명한 주석)
+- [ ] 주석이 있다면 "왜(Why)"를 설명, "무엇(What)"은 코드로
+
 ## DDD 레이어 준수 (HIGH 이상)
 
 ### 의존성 방향
