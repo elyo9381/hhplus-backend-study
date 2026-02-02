@@ -15,7 +15,6 @@ import java.util.List;
  */
 @Component
 @Profile("test")
-@Primary
 public class MockMessageProducer implements MessageProducer {
 
     @Getter

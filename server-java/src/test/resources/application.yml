@@ -1,5 +1,11 @@
 spring:
   # Testcontainers @ServiceConnection이 자동으로 설정하므로 datasource 설정 불필요
+  kafka:
+    consumer:
+      group-id: test-group
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   jpa:
     hibernate:
       ddl-auto: create-drop

@@ -1,18 +1,20 @@
 package kr.hhplus.be.server;
 
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
  * 통합 테스트용 Testcontainers 지원
- * 
+ *
  * Lazy initialization으로 실제 사용 시에만 컨테이너 시작
  */
 public abstract class TestContainerSupport {
 
     private static MySQLContainer<?> mysqlContainer;
-    private static KafkaContainer kafkaContainer ;
+    private static KafkaContainer kafkaContainer;
+    private static GenericContainer<?> redisContainer;
 
     protected static synchronized MySQLContainer<?> getMySQLContainer() {
         if (mysqlContainer == null) {
@@ -38,8 +40,8 @@ public abstract class TestContainerSupport {
         return getMySQLContainer().getPassword();
     }
 
-    protected static synchronized KafkaContainer getKafkaContainer(){
-        if(kafkaContainer == null){
+    protected static synchronized KafkaContainer getKafkaContainer() {
+        if (kafkaContainer == null) {
             kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.0"))
                     .withReuse(true);
             kafkaContainer.start();
@@ -47,7 +49,25 @@ public abstract class TestContainerSupport {
         return kafkaContainer;
     }
 
-    protected static String getBootstrapServers(){
+    protected static String getBootstrapServers() {
         return getKafkaContainer().getBootstrapServers();
+    }
+
+    protected static synchronized GenericContainer<?> getRedisContainer() {
+        if (redisContainer == null) {
+            redisContainer = new GenericContainer<>("redis:7-alpine")
+                    .withExposedPorts(6379)
+                    .withReuse(true);
+            redisContainer.start();
+        }
+        return redisContainer;
+    }
+
+    protected static String getRedisHost() {
+        return getRedisContainer().getHost();
+    }
+
+    protected static Integer getRedisPort() {
+        return getRedisContainer().getFirstMappedPort();
     }
 }

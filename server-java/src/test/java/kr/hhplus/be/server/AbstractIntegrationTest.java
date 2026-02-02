@@ -21,5 +21,7 @@ public abstract class AbstractIntegrationTest extends TestContainerSupport {
         registry.add("spring.datasource.username", TestContainerSupport::getUsername);
         registry.add("spring.datasource.password", TestContainerSupport::getPassword);
         registry.add("spring.kafka.bootstrap-servers", TestContainerSupport::getBootstrapServers);
+        registry.add("spring.data.redis.host", TestContainerSupport::getRedisHost);
+        registry.add("spring.data.redis.port", TestContainerSupport::getRedisPort);
     }
 }
