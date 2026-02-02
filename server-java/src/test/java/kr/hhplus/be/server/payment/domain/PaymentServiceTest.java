@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,9 +44,6 @@ class PaymentServiceTest {
     @Mock
     private ProductRankingRepository productRankingRepository;
 
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
-
     private PaymentService paymentService;
 
     @BeforeEach
@@ -58,8 +54,7 @@ class PaymentServiceTest {
                 pointPort, 
                 outboxRepository,
                 new ObjectMapper(),
-                productRankingRepository,
-                eventPublisher
+                productRankingRepository
         );
     }
 
@@ -92,6 +87,7 @@ class PaymentServiceTest {
         verify(pointPort).usePoint(userId, 20000L);
         verify(paymentRepository).save(any(Payment.class));
         verify(orderRepository).save(any(Order.class));
+        verify(outboxRepository).save(any());
     }
 
     @Test

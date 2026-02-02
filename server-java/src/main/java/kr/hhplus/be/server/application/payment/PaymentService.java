@@ -13,6 +13,7 @@ import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.infrastructure.product.ProductRankingRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,22 +31,19 @@ public class PaymentService {
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
     private final ProductRankingRepository productRankingRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     public PaymentService(PaymentRepository paymentRepository,
                           OrderRepository orderRepository,
                           PointPort pointPort,
                           OutboxRepository outboxRepository,
                           ObjectMapper objectMapper,
-                          ProductRankingRepository productRankingRepository,
-                          ApplicationEventPublisher eventPublisher) {
+                          ProductRankingRepository productRankingRepository){
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.pointPort = pointPort;
         this.outboxRepository = outboxRepository;
         this.objectMapper = objectMapper;
         this.productRankingRepository = productRankingRepository;
-        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -105,9 +103,6 @@ public class PaymentService {
 
         // 10. 인기 상품 랭킹 업데이트 (결제 완료 시점)
         updateProductRanking(order);
-
-        // 11. 데이터 플랫폼 전송 이벤트 발행 (트랜잭션 커밋 후 처리)
-        eventPublisher.publishEvent(PaymentCompletedEvent.from(savedPayment));
 
         return savedPayment;
     }

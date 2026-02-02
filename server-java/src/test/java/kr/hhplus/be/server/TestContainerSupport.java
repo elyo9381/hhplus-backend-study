@@ -1,6 +1,8 @@
 package kr.hhplus.be.server;
 
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * 통합 테스트용 Testcontainers 지원
@@ -10,6 +12,7 @@ import org.testcontainers.containers.MySQLContainer;
 public abstract class TestContainerSupport {
 
     private static MySQLContainer<?> mysqlContainer;
+    private static KafkaContainer kafkaContainer ;
 
     protected static synchronized MySQLContainer<?> getMySQLContainer() {
         if (mysqlContainer == null) {
@@ -33,5 +36,18 @@ public abstract class TestContainerSupport {
 
     protected static String getPassword() {
         return getMySQLContainer().getPassword();
+    }
+
+    protected static synchronized KafkaContainer getKafkaContainer(){
+        if(kafkaContainer == null){
+            kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.0"))
+                    .withReuse(true);
+            kafkaContainer.start();
+        }
+        return kafkaContainer;
+    }
+
+    protected static String getBootstrapServers(){
+        return getKafkaContainer().getBootstrapServers();
     }
 }

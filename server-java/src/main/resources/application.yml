@@ -18,6 +18,17 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         connection:
           isolation: 2  # READ_COMMITTED (1=RU, 2=RC, 4=RR, 8=SR)
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: hhplus-server
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.package: "*"
 
 logging:
   level:

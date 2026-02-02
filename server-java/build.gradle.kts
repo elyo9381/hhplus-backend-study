@@ -37,6 +37,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux") // WebClient
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
+    //
+    implementation("org.springframework.kafka:spring-kafka")
+
     // Redisson
     implementation("org.redisson:redisson-spring-boot-starter:3.24.3")
 
@@ -53,6 +56,7 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
 	testImplementation("com.h2database:h2")  // 단위 테스트용
+    testImplementation("org.testcontainers:kafka")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
