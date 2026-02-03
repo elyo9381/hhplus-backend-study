@@ -73,12 +73,18 @@ public class CouponService {
         couponIssueStatusRepository.save(status);
 
         // 3. Kafka 발행 (비동기 처리)
-        kafkaTemplate.send("coupon-issue-request",
-                couponId.toString(),
-                new CouponIssueRequest(requestId, couponId, userId, Instant.now()));
-
-        log.info("쿠폰 발급 요청 - requestId: {}, couponId: {}, userId: {}", 
-                requestId, couponId, userId);
+        try {
+            kafkaTemplate.send("coupon-issue-request",
+                    couponId.toString(),
+                    new CouponIssueRequest(requestId, couponId, userId, Instant.now()))
+                    .get();  // 동기 대기
+            
+            log.info("쿠폰 발급 요청 전송 완료 - requestId: {}, couponId: {}, userId: {}", 
+                    requestId, couponId, userId);
+        } catch (Exception e) {
+            log.error("Kafka 메시지 발행 실패", e);
+            throw new RuntimeException("쿠폰 발급 요청 실패", e);
+        }
 
         return requestId;
     }

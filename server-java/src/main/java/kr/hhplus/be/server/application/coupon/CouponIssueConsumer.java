@@ -23,9 +23,12 @@ public class CouponIssueConsumer {
     private final UserCouponRepository userCouponRepository;
     private final CouponIssueStatusRepository couponIssueStatusRepository;
 
-    @KafkaListener(topics = "coupon-issue-request", concurrency = "3")
+    @KafkaListener(topics = "coupon-issue-request", concurrency = "3", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
     public void consume(CouponIssueRequest request) {
+        log.info("=== Consumer 시작 - requestId: {}, couponId: {}, userId: {} ===", 
+                request.requestId(), request.couponId(), request.userId());
+        
         try {
             // 1. 중복 발급 체크
             if (userCouponRepository.existsByUserIdAndCouponId(request.userId(), request.couponId())) {

@@ -31,7 +31,7 @@ public class CouponIssueStatusEntity {
     @Column(nullable = false, length = 20)
     private CouponIssueStatusType status;
 
-    @Column
+    @Column(name = "issue_rank")
     private Integer rank;
 
     @Column(length = 100)
