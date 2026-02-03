@@ -45,4 +45,9 @@ public class UserCouponRepositoryImpl implements UserCouponRepository {
     public boolean existsByUserIdAndCouponId(UUID userId, UUID couponId) {
         return jpaRepository.existsByUserIdAndCouponId(userId, couponId);
     }
+
+    @Override
+    public long countByCouponId(UUID couponId) {
+        return jpaRepository.countByCouponId(couponId);
+    }
 }

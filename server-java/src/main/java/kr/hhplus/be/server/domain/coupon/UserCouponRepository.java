@@ -10,4 +10,5 @@ public interface UserCouponRepository {
     List<UserCoupon> findByUserId(UUID userId);
     Optional<UserCoupon> findByUserIdAndCouponId(UUID userId, UUID couponId);
     boolean existsByUserIdAndCouponId(UUID userId, UUID couponId);
+    long countByCouponId(UUID couponId);  // 순위 계산용
 }
