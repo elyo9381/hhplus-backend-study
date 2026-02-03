@@ -25,6 +25,7 @@ public class CouponRedisRepository {
     private static final String LOCK_PREFIX = "coupon:lock:";
     private static final String ISSUED_PREFIX = "coupon:issued:";
     private static final String INFO_PREFIX = "coupon:info:";
+    private static final String RANK_PREFIX = "coupon:rank:";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     /**
@@ -140,25 +141,47 @@ public class CouponRedisRepository {
     }
 
     /**
+     * 순위 원자적 증가 (INCR)
+     * - 분산 환경에서도 순위 중복 없이 정확하게 부여
+     *
+     * @return 현재 순위 (1부터 시작)
+     */
+    public long incrementRank(UUID couponId) {
+        return redissonClient.getAtomicLong(RANK_PREFIX + couponId).incrementAndGet();
+    }
+
+    /**
+     * 현재 순위 조회 (발급된 수량)
+     */
+    public long getCurrentRank(UUID couponId) {
+        return redissonClient.getAtomicLong(RANK_PREFIX + couponId).get();
+    }
+
+    /**
      * 쿠폰 Redis 초기화 (쿠폰 생성 시)
      */
     public void initCoupon(UUID couponId, int maxQuantity, LocalDateTime startAt, LocalDateTime endAt) {
         long ttlSeconds = Duration.between(LocalDateTime.now(), endAt.plusDays(1)).getSeconds();
         Duration ttl = ttlSeconds > 0 ? Duration.ofSeconds(ttlSeconds) : Duration.ofDays(1);
-        
+
         // 발급 Set 초기화
         RSet<String> issuedSet = redissonClient.getSet(ISSUED_PREFIX + couponId);
         issuedSet.clear();
         issuedSet.expire(ttl);
-        
+
+        // 순위 카운터 초기화 (0부터 시작, INCR 시 1부터)
+        var rankCounter = redissonClient.getAtomicLong(RANK_PREFIX + couponId);
+        rankCounter.set(0);
+        rankCounter.expire(ttl);
+
         // 쿠폰 정보 캐싱 (Hash)
         RMap<String, String> infoMap = redissonClient.getMap(INFO_PREFIX + couponId);
         infoMap.put("maxQuantity", String.valueOf(maxQuantity));
         infoMap.put("startAt", startAt.format(DATE_FORMAT));
         infoMap.put("endAt", endAt.format(DATE_FORMAT));
         infoMap.expire(ttl);
-        
-        log.info("쿠폰 Redis 초기화 - couponId: {}, maxQuantity: {}, TTL: {}s", 
+
+        log.info("쿠폰 Redis 초기화 - couponId: {}, maxQuantity: {}, TTL: {}s",
                 couponId, maxQuantity, ttl.getSeconds());
     }
 
@@ -175,6 +198,7 @@ public class CouponRedisRepository {
     public void deleteCoupon(UUID couponId) {
         redissonClient.getSet(ISSUED_PREFIX + couponId).delete();
         redissonClient.getMap(INFO_PREFIX + couponId).delete();
+        redissonClient.getAtomicLong(RANK_PREFIX + couponId).delete();
     }
 
     /**

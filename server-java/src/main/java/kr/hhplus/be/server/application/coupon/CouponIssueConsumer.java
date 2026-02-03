@@ -6,6 +6,7 @@ import kr.hhplus.be.server.domain.coupon.CouponIssueStatusRepository;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
 import kr.hhplus.be.server.domain.coupon.UserCoupon;
 import kr.hhplus.be.server.domain.coupon.UserCouponRepository;
+import kr.hhplus.be.server.infrastructure.coupon.CouponRedisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,13 +23,14 @@ public class CouponIssueConsumer {
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
     private final CouponIssueStatusRepository couponIssueStatusRepository;
+    private final CouponRedisRepository couponRedisRepository;
 
     @KafkaListener(topics = "coupon-issue-request", concurrency = "3", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
     public void consume(CouponIssueRequest request) {
-        log.info("=== Consumer 시작 - requestId: {}, couponId: {}, userId: {} ===", 
+        log.info("=== Consumer 시작 - requestId: {}, couponId: {}, userId: {} ===",
                 request.requestId(), request.couponId(), request.userId());
-        
+
         try {
             // 1. 중복 발급 체크
             if (userCouponRepository.existsByUserIdAndCouponId(request.userId(), request.couponId())) {
@@ -37,17 +39,18 @@ public class CouponIssueConsumer {
                 return;
             }
 
-            // 2. 현재 발급 수 조회 (순위 계산용)
-            long currentCount = userCouponRepository.countByCouponId(request.couponId());
-
-            // 3. 쿠폰 조회
+            // 2. 쿠폰 조회
             Coupon coupon = couponRepository.findById(request.couponId())
                     .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다"));
 
-            // 4. 수량 체크
-            if (currentCount >= coupon.getTotalQuantity()) {
+            // 3. Redis INCR로 순위 원자적 획득 (분산 환경에서도 중복 없음)
+            long rank = couponRedisRepository.incrementRank(request.couponId());
+
+            // 4. 수량 체크 (순위가 총 수량을 초과하면 실패)
+            if (rank > coupon.getTotalQuantity()) {
                 updateStatusFailed(request.requestId(), "쿠폰 소진");
-                log.info("쿠폰 마감 - couponId: {}, currentCount: {}", request.couponId(), currentCount);
+                log.info("쿠폰 마감 - couponId: {}, rank: {}, totalQuantity: {}",
+                        request.couponId(), rank, coupon.getTotalQuantity());
                 return;
             }
 
@@ -60,19 +63,18 @@ public class CouponIssueConsumer {
             userCouponRepository.save(userCoupon);
 
             // 7. 성공 상태 저장 (순위 포함)
-            int rank = (int) currentCount + 1;
-            updateStatusSuccess(request.requestId(), rank);
+            updateStatusSuccess(request.requestId(), (int) rank);
 
-            log.info("쿠폰 발급 성공 - rank: {}, couponId: {}, userId: {}, remaining: {}", 
+            log.info("쿠폰 발급 성공 - rank: {}, couponId: {}, userId: {}, remaining: {}",
                     rank, request.couponId(), request.userId(), coupon.getRemainingQuantity());
 
         } catch (IllegalStateException e) {
             updateStatusFailed(request.requestId(), e.getMessage());
-            log.warn("쿠폰 발급 실패 - couponId: {}, userId: {}, reason: {}", 
+            log.warn("쿠폰 발급 실패 - couponId: {}, userId: {}, reason: {}",
                     request.couponId(), request.userId(), e.getMessage());
         } catch (Exception e) {
             updateStatusFailed(request.requestId(), "시스템 오류");
-            log.error("쿠폰 발급 중 오류 - couponId: {}, userId: {}", 
+            log.error("쿠폰 발급 중 오류 - couponId: {}, userId: {}",
                     request.couponId(), request.userId(), e);
             throw e;
         }

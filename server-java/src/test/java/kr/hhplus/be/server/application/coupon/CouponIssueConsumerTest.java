@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.coupon;
 
 import kr.hhplus.be.server.domain.coupon.*;
+import kr.hhplus.be.server.infrastructure.coupon.CouponRedisRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,11 +29,14 @@ class CouponIssueConsumerTest {
     @Mock
     private CouponIssueStatusRepository couponIssueStatusRepository;
 
+    @Mock
+    private CouponRedisRepository couponRedisRepository;
+
     @InjectMocks
     private CouponIssueConsumer consumer;
 
     @Test
-    @DisplayName("정상 발급 시 순위가 계산되고 상태가 SUCCESS로 업데이트된다")
+    @DisplayName("정상 발급 시 Redis INCR로 순위가 계산되고 상태가 SUCCESS로 업데이트된다")
     void consume_success() {
         // given
         UUID requestId = UUID.randomUUID();
@@ -45,14 +49,15 @@ class CouponIssueConsumerTest {
         CouponIssueStatus status = new CouponIssueStatus(requestId, couponId, userId);
 
         when(userCouponRepository.existsByUserIdAndCouponId(userId, couponId)).thenReturn(false);
-        when(userCouponRepository.countByCouponId(couponId)).thenReturn(5L);
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
+        when(couponRedisRepository.incrementRank(couponId)).thenReturn(6L);  // Redis INCR 반환값
         when(couponIssueStatusRepository.findById(requestId)).thenReturn(Optional.of(status));
 
         // when
         consumer.consume(request);
 
         // then
+        verify(couponRedisRepository).incrementRank(couponId);
         verify(userCouponRepository).save(any(UserCoupon.class));
         verify(couponRepository).save(coupon);
         verify(couponIssueStatusRepository, times(1)).save(argThat(s ->
@@ -100,14 +105,15 @@ class CouponIssueConsumerTest {
         CouponIssueStatus status = new CouponIssueStatus(requestId, couponId, userId);
 
         when(userCouponRepository.existsByUserIdAndCouponId(userId, couponId)).thenReturn(false);
-        when(userCouponRepository.countByCouponId(couponId)).thenReturn(100L);
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
+        when(couponRedisRepository.incrementRank(couponId)).thenReturn(101L);  // 총 수량 100 초과
         when(couponIssueStatusRepository.findById(requestId)).thenReturn(Optional.of(status));
 
         // when
         consumer.consume(request);
 
         // then
+        verify(couponRedisRepository).incrementRank(couponId);
         verify(userCouponRepository, never()).save(any());
         verify(couponRepository, never()).save(any());
         verify(couponIssueStatusRepository).save(argThat(s ->
@@ -128,7 +134,6 @@ class CouponIssueConsumerTest {
         CouponIssueStatus status = new CouponIssueStatus(requestId, couponId, userId);
 
         when(userCouponRepository.existsByUserIdAndCouponId(userId, couponId)).thenReturn(false);
-        when(userCouponRepository.countByCouponId(couponId)).thenReturn(5L);
         when(couponRepository.findById(couponId)).thenReturn(Optional.empty());
         when(couponIssueStatusRepository.findById(requestId)).thenReturn(Optional.of(status));
 
