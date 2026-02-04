@@ -5,11 +5,13 @@ import kr.hhplus.be.server.infrastructure.coupon.CouponRedisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -19,9 +21,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CouponService {
 
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
     private final CouponRedisRepository couponRedisRepository;
+    private final CouponIssueStatusRepository couponIssueStatusRepository;
 
     /**
      * 쿠폰 생성
@@ -34,7 +38,7 @@ public class CouponService {
         // 1. DB 저장
         Coupon coupon = new Coupon(name, discountAmount, totalQuantity, startAt, endAt);
         Coupon saved = couponRepository.save(coupon);
-        
+
         // 2. Redis 초기화 (DB와 동일한 값)
         //    실패 시 RuntimeException → 트랜잭션 롤백
         try {
@@ -48,48 +52,50 @@ public class CouponService {
             log.error("Redis 초기화 실패 - couponId: {}", saved.getId(), e);
             throw new RuntimeException("쿠폰 생성 실패: Redis 초기화 오류", e);
         }
-        
+
         return saved;
     }
 
     /**
-     * 선착순 쿠폰 발급 (Redis Only - DB 조회 없음)
+     * 선착순 쿠폰 발급 (Kafka 비동기 처리)
      * 
-     * 동시성 제어:
-     * 1. Redis에서 쿠폰 정보 조회 (DB 조회 X)
-     * 2. Redis 분산락으로 원자적 발급 (중복 + 수량 + 기간 체크)
-     * 3. 트랜잭션 롤백 시 Redis 자동 롤백
-     * 4. DB 저장 (UserCoupon + Coupon remainingQuantity)
+     * @return requestId (상태 조회용)
      */
     @Transactional
-    public UserCoupon issueCoupon(UUID couponId, UUID userId) {
-        // 1. Redis 분산락 기반 발급 (DB 조회 없이 Redis만 사용)
-        boolean issued = couponRedisRepository.tryIssue(couponId, userId);
-        if (!issued) {
-            throw new IllegalStateException("이미 발급받은 쿠폰입니다");
-        }
-
-        // 2. 트랜잭션 롤백 시 Redis 자동 롤백 등록
-        registerRedisRollback(couponId, userId);
-
-        // 3. DB 저장 (쿠폰 정보는 여기서 조회 - 저장용)
+    public UUID issueCoupon(UUID couponId, UUID userId) {
+        // 1. 쿠폰 존재 여부 체크 (빠른 실패)
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다"));
 
+        // 2. 요청 ID 생성 및 PENDING 상태 저장
+        UUID requestId = UUID.randomUUID();
+        CouponIssueStatus status = new CouponIssueStatus(requestId, couponId, userId);
+        couponIssueStatusRepository.save(status);
+
+        // 3. Kafka 발행 (비동기 처리)
         try {
-            // 4. DB 저장 - UserCoupon
-            UserCoupon userCoupon = new UserCoupon(userId, coupon);
-            UserCoupon saved = userCouponRepository.save(userCoupon);
+            kafkaTemplate.send("coupon-issue-request",
+                    couponId.toString(),
+                    new CouponIssueRequest(requestId, couponId, userId, Instant.now()))
+                    .get();  // 동기 대기
             
-            // 5. DB 동기화 - Coupon remainingQuantity 차감
-            coupon.issue();
-            couponRepository.save(coupon);
-            
-            return saved;
-            
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalStateException("이미 발급받은 쿠폰입니다");
+            log.info("쿠폰 발급 요청 전송 완료 - requestId: {}, couponId: {}, userId: {}", 
+                    requestId, couponId, userId);
+        } catch (Exception e) {
+            log.error("Kafka 메시지 발행 실패", e);
+            throw new RuntimeException("쿠폰 발급 요청 실패", e);
         }
+
+        return requestId;
+    }
+
+    /**
+     * 발급 상태 조회
+     */
+    @Transactional(readOnly = true)
+    public CouponIssueStatus getIssueStatus(UUID requestId) {
+        return couponIssueStatusRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("요청을 찾을 수 없습니다"));
     }
 
     /**

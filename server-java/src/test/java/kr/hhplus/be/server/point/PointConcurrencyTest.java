@@ -30,6 +30,9 @@ class PointConcurrencyTest extends TestContainerSupport {
         registry.add("spring.datasource.url", TestContainerSupport::getJdbcUrl);
         registry.add("spring.datasource.username", TestContainerSupport::getUsername);
         registry.add("spring.datasource.password", TestContainerSupport::getPassword);
+        registry.add("spring.data.redis.host", TestContainerSupport::getRedisHost);
+        registry.add("spring.data.redis.port", TestContainerSupport::getRedisPort);
+        registry.add("spring.kafka.bootstrap-servers", TestContainerSupport::getBootstrapServers);
     }
 
     @Autowired

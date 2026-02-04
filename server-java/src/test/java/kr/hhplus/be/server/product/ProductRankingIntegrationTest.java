@@ -39,6 +39,7 @@ class ProductRankingIntegrationTest extends TestContainerSupport {
         registry.add("spring.datasource.password", TestContainerSupport::getPassword);
         registry.add("spring.data.redis.host", redis::getHost);
         registry.add("spring.data.redis.port", redis::getFirstMappedPort);
+        registry.add("spring.kafka.bootstrap-servers", TestContainerSupport::getBootstrapServers);
     }
 
     @Autowired

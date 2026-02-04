@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
@@ -37,6 +38,12 @@ class CouponServiceUnitTest {
     @Mock
     private CouponRedisRepository couponRedisRepository;
 
+    @Mock
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Mock
+    private CouponIssueStatusRepository couponIssueStatusRepository;
+
     private CouponService couponService;
 
     private Coupon testCoupon;
@@ -45,7 +52,7 @@ class CouponServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        couponService = new CouponService(couponRepository, userCouponRepository, couponRedisRepository);
+        couponService = new CouponService(kafkaTemplate, couponRepository, userCouponRepository, couponRedisRepository, couponIssueStatusRepository);
         
         couponId = UUID.randomUUID();
         userId = UUID.randomUUID();
@@ -76,80 +83,68 @@ class CouponServiceUnitTest {
     }
 
     @Test
-    @DisplayName("쿠폰 발급 성공 - Redis 발급 + DB 저장")
+    @DisplayName("쿠폰 발급 성공 (비동기) - Kafka 발행")
     void 쿠폰_발급_성공() {
         // given
-        when(couponRedisRepository.tryIssue(couponId, userId)).thenReturn(true);
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(testCoupon));
-        when(userCouponRepository.save(any(UserCoupon.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(couponRepository.save(any(Coupon.class))).thenReturn(testCoupon);
+        when(couponIssueStatusRepository.save(any(CouponIssueStatus.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
 
         // when
-        UserCoupon result = couponService.issueCoupon(couponId, userId);
+        UUID requestId = couponService.issueCoupon(couponId, userId);
 
         // then
-        assertThat(result).isNotNull();
-        assertThat(result.getUserId()).isEqualTo(userId);
-        assertThat(result.getCouponId()).isEqualTo(couponId);
-        verify(couponRedisRepository).tryIssue(couponId, userId);
-        verify(userCouponRepository).save(any(UserCoupon.class));
-    }
-
-    @Test
-    @DisplayName("쿠폰 발급 실패 - 이미 발급됨 (Redis)")
-    void 쿠폰_발급_실패_이미_발급() {
-        // given
-        when(couponRedisRepository.tryIssue(couponId, userId)).thenReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> couponService.issueCoupon(couponId, userId))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("이미 발급받은 쿠폰");
-
-        verify(userCouponRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("쿠폰 발급 실패 - 수량 소진 (Redis)")
-    void 쿠폰_발급_실패_수량_소진() {
-        // given - Redis에서 수량 소진으로 false 반환
-        when(couponRedisRepository.tryIssue(couponId, userId)).thenReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> couponService.issueCoupon(couponId, userId))
-                .isInstanceOf(IllegalStateException.class);
-
-        verify(userCouponRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("쿠폰 발급 실패 - DB 저장 실패 시 Redis 롤백")
-    void 쿠폰_발급_실패_DB_저장_실패_롤백() {
-        // given
-        when(couponRedisRepository.tryIssue(couponId, userId)).thenReturn(true);
-        when(couponRepository.findById(couponId)).thenReturn(Optional.of(testCoupon));
-        when(userCouponRepository.save(any(UserCoupon.class)))
-                .thenThrow(new RuntimeException("DB 저장 실패"));
-
-        // when & then
-        assertThatThrownBy(() -> couponService.issueCoupon(couponId, userId))
-                .isInstanceOf(RuntimeException.class);
-
-        // 롤백은 TransactionSynchronization.afterCompletion에서 호출됨
-        // 단위 테스트에서는 트랜잭션이 실제로 롤백되지 않으므로 검증 생략
+        assertThat(requestId).isNotNull();
+        verify(couponRepository).findById(couponId);
+        verify(couponIssueStatusRepository).save(any(CouponIssueStatus.class));
+        verify(kafkaTemplate).send(eq("coupon-issue-request"), eq(couponId.toString()), any());
     }
 
     @Test
     @DisplayName("쿠폰 발급 실패 - 쿠폰 없음")
     void 쿠폰_발급_실패_쿠폰_없음() {
         // given
-        when(couponRedisRepository.tryIssue(couponId, userId)).thenReturn(true);
         when(couponRepository.findById(couponId)).thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> couponService.issueCoupon(couponId, userId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("쿠폰을 찾을 수 없습니다");
+        
+        verify(couponIssueStatusRepository, never()).save(any());
+        verify(kafkaTemplate, never()).send(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("발급 상태 조회 성공")
+    void 발급_상태_조회_성공() {
+        // given
+        UUID requestId = UUID.randomUUID();
+        CouponIssueStatus status = new CouponIssueStatus(requestId, couponId, userId);
+        status.updateSuccess(42);
+        
+        when(couponIssueStatusRepository.findById(requestId)).thenReturn(Optional.of(status));
+
+        // when
+        CouponIssueStatus result = couponService.getIssueStatus(requestId);
+
+        // then
+        assertThat(result.getRequestId()).isEqualTo(requestId);
+        assertThat(result.getStatus()).isEqualTo(CouponIssueStatusType.SUCCESS);
+        assertThat(result.getRank()).isEqualTo(42);
+    }
+
+    @Test
+    @DisplayName("발급 상태 조회 실패 - 요청 없음")
+    void 발급_상태_조회_실패() {
+        // given
+        UUID requestId = UUID.randomUUID();
+        when(couponIssueStatusRepository.findById(requestId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> couponService.getIssueStatus(requestId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("요청을 찾을 수 없습니다");
     }
 
     @Test

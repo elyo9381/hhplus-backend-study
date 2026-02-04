@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.application.outbox;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * 외부 메시지 시스템과의 통신을 위한 Port 인터페이스
  * 

@@ -8,7 +8,26 @@ spring:
         format_sql: true
         connection:
           isolation: 2  # READ_COMMITTED
+  
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: test-group
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    listener:
+      ack-mode: record  # 즉시 처리
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
     org.testcontainers: OFF
+    org.apache.kafka: WARN
+    org.springframework.kafka: DEBUG  # Kafka 로그 활성화

@@ -14,4 +14,6 @@ public interface UserCouponJpaRepository extends JpaRepository<UserCouponEntity,
     
     @Query("SELECT COUNT(uc) > 0 FROM UserCouponEntity uc WHERE uc.userId = :userId AND uc.couponId = :couponId")
     boolean existsByUserIdAndCouponId(@Param("userId") UUID userId, @Param("couponId") UUID couponId);
+    
+    long countByCouponId(UUID couponId);
 }
